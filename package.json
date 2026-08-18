@@ -1,0 +1,50 @@
+{
+  "name": "web-traffic-lab-automation-platform",
+  "version": "1.0.0",
+  "description": "Web Traffic Lab Automation Platform: a live browser Traffic Automation project with a sample demo deployment on Render.",
+  "main": "backend/server.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SyntaxSouq/web-traffic-lab-automation-bot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/SyntaxSouq/web-traffic-lab-automation-bot/issues"
+  },
+  "homepage": "https://github.com/SyntaxSouq/web-traffic-lab-automation-bot#readme",
+  "scripts": {
+    "postinstall": "playwright install chromium",
+    "dev:backend": "node backend/server.js",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "install:all": "npm install && cd frontend && npm install",
+    "build:frontend": "cd frontend && npm install && npm run build",
+    "build": "npm install && npx playwright install chromium && cd frontend && npm install && npm run build",
+    "prestart": "playwright install chromium",
+    "start": "node backend/server.js",
+    "leapcell:build": "npm install && cd frontend && npm install && npm run build",
+    "leapcell:start": "node backend/server.js"
+  },
+  "keywords": [
+    "browser automation",
+    "playwright",
+    "react",
+    "traffic simulation",
+    "anti-bot",
+    "ssrf",
+    "sse"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "concurrently": "^9.2.1",
+    "cors": "^2.8.6",
+    "express": "^4.18.2",
+    "ipaddr.js": "^2.3.0",
+    "playwright": "^1.59.1",
+    "playwright-extra": "^4.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
+  }
+}
