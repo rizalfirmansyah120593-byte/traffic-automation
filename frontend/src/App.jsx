@@ -39,7 +39,8 @@ function App() {
       remaining: totalVisits, 
       failed: 0,
       currentLoop: 1,
-      totalLoops: options.loopCount || 1
+      totalLoops: options.loopCount || 1,
+      options
     };
     setProgress(progressRef.current);
     
@@ -187,7 +188,7 @@ function App() {
         
         <URLInput onSubmit={handleAutomate} />
         
-        {loading && <LoadingScreen progress={progress} onStop={handleStop} url={currentUrl} />}
+        {loading && <LoadingScreen progress={progress} onStop={handleStop} url={currentUrl} options={progressRef.current?.options} />}
         
         {result && result.cancelled && <CancelledResult data={result} onResume={handleResume} />}
         {result && !result.cancelled && <ResultCard data={result} />}

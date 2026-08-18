@@ -1,115 +1,39 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  FaSpinner, 
-  FaGlobe, 
-  FaNetworkWired,
-  FaStop 
-} from 'react-icons/fa';
+import { FaCheckCircle, FaChevronRight, FaClock, FaGlobe, FaLayerGroup, FaNetworkWired, FaShieldAlt, FaStop } from 'react-icons/fa';
 
-/**
- * LoadingScreen Component
- * Displays the automation status, target URL, detected IP, and progress counters.
- */
-function LoadingScreen({ progress, onStop, url }) {
+function LoadingScreen({ progress, onStop, url, options = {} }) {
   const [ip, setIp] = useState('Detecting...');
-
-  // Effect to fetch and periodically update the public IP address
+  const [elapsed, setElapsed] = useState(0);
   useEffect(() => {
-    const fetchIp = () => {
-      fetch('/api/my-ip')
-        .then(res => res.json())
-        .then(data => setIp(data.ip || 'Unavailable'))
-        .catch(() => setIp('Unavailable'));
-    };
-
-    fetchIp();
-    const interval = setInterval(fetchIp, 10000);
-    return () => clearInterval(interval);
+    const started = Date.now();
+    const timer = setInterval(() => setElapsed(Math.floor((Date.now() - started) / 1000)), 1000);
+    fetch('/api/my-ip').then(res => res.json()).then(data => setIp(data.ip || 'Unavailable')).catch(() => setIp('Unavailable'));
+    return () => clearInterval(timer);
   }, []);
 
-  return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50"
-    >
-      <div className="text-center p-8 bg-gray-900/80 rounded-2xl border border-white/10 shadow-2xl min-w-[320px] max-w-md">
-        {/* Animated Spinner */}
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-6 flex items-center justify-center"
-        >
-          <FaSpinner className="text-2xl text-purple-400" />
-        </motion.div>
+  const completed = progress?.completed || 0;
+  const failed = progress?.failed || 0;
+  const remaining = progress?.remaining || 0;
+  const total = Math.max(completed + failed + remaining, 1);
+  const percentage = Math.min(100, Math.round(((completed + failed) / total) * 100));
+  const step = remaining === 0 ? 'Finalizing report' : completed === 0 ? 'Preparing secure browser session' : 'Processing website visits';
+  const formatTime = useMemo(() => `${String(Math.floor(elapsed / 60)).padStart(2, '0')}:${String(elapsed % 60).padStart(2, '0')}`, [elapsed]);
+  const stats = [['Completed', completed, 'text-emerald-300', 'bg-emerald-400/10'], ['Remaining', remaining, 'text-amber-300', 'bg-amber-400/10'], ['Failed', failed, 'text-rose-300', 'bg-rose-400/10']];
 
-        {/* Status Text */}
-        <motion.p 
-          animate={{ opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-          className="text-white text-2xl font-semibold mb-1"
-        >
-          Automating Website...
-        </motion.p>
-        <p className="text-gray-400 text-sm mb-4">Please wait while we process your request</p>
-        
-        {progress?.totalLoops > 1 && (
-          <div className="mb-6 inline-block px-4 py-1 bg-purple-500/20 border border-purple-500/30 rounded-full">
-            <span className="text-purple-300 text-[10px] font-bold uppercase tracking-widest">
-              Loop {progress.currentLoop || 1} of {progress.totalLoops}
-            </span>
-          </div>
-        )}
-        
-        {/* Target URL Card */}
-        <div className="mb-4 p-4 bg-white/5 rounded-xl border border-white/10 text-left">
-          <div className="flex items-center gap-2 mb-2">
-            <FaGlobe className="text-purple-400 text-sm" />
-            <span className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Target URL</span>
-          </div>
-          <p className="text-white font-mono text-sm break-all">{url || 'https://google.com'}</p>
-        </div>
-        
-        {/* IP Address Card */}
-        <div className="mb-6 p-4 bg-white/5 rounded-xl border border-white/10 text-left">
-          <div className="flex items-center gap-2 mb-2">
-            <FaNetworkWired className="text-blue-400 text-sm" />
-            <span className="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Your IP</span>
-          </div>
-          <p className="text-white font-mono text-sm">{ip}</p>
-        </div>
-        
-        {/* Progress Grid */}
-        <div className="grid grid-cols-3 gap-3 mb-8">
-          <div className="flex flex-col items-center p-3 bg-white/5 rounded-xl border border-white/5">
-            <span className="text-2xl font-bold text-green-400">{progress?.completed || 0}</span>
-            <span className="text-[9px] text-gray-500 uppercase font-bold mt-1">Completed</span>
-          </div>
-          <div className="flex flex-col items-center p-3 bg-white/5 rounded-xl border border-white/5">
-            <span className="text-2xl font-bold text-yellow-400">{progress?.remaining || 1}</span>
-            <span className="text-[9px] text-gray-500 uppercase font-bold mt-1">Remaining</span>
-          </div>
-          <div className="flex flex-col items-center p-3 bg-white/5 rounded-xl border border-white/5">
-            <span className="text-2xl font-bold text-red-400">{progress?.failed || 0}</span>
-            <span className="text-[9px] text-gray-500 uppercase font-bold mt-1">Failed</span>
-          </div>
-        </div>
-        
-        {/* Action Button */}
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={onStop}
-          className="w-full py-4 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-bold text-sm uppercase tracking-widest shadow-lg shadow-red-900/20 flex items-center justify-center gap-2 transition-all"
-        >
-          <FaStop className="text-xs" />
-          Stop Automation
-        </motion.button>
+  return <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-xl">
+    <motion.div initial={{ y: 24, scale: .97 }} animate={{ y: 0, scale: 1 }} className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-white/15 bg-slate-900/95 p-6 text-white shadow-2xl shadow-purple-950/50 sm:p-8">
+      <div className="absolute -right-24 -top-24 h-48 w-48 rounded-full bg-fuchsia-500/20 blur-3xl" />
+      <div className="relative">
+        <div className="mb-7 flex items-start justify-between"><div className="flex items-center gap-3"><div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 shadow-lg shadow-violet-500/30"><motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: 'linear' }} className="h-7 w-7 rounded-full border-2 border-white/30 border-t-white" /></div><div><p className="text-xs font-bold uppercase tracking-[.2em] text-violet-300">Live session</p><h2 className="text-2xl font-bold">Automation in progress</h2></div></div><div className="flex items-center gap-1.5 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-300"><span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" /> Active</div></div>
+        <div className="mb-6 rounded-2xl border border-white/10 bg-white/[.04] p-4"><div className="mb-3 flex items-center justify-between text-xs"><span className="flex items-center gap-2 text-slate-300"><FaChevronRight className="text-violet-400" /> {step}</span><span className="font-bold text-violet-300">{percentage}%</span></div><div className="h-2 overflow-hidden rounded-full bg-slate-800"><motion.div initial={{ width: 0 }} animate={{ width: `${percentage}%` }} className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-violet-500 to-fuchsia-500" /></div><div className="mt-3 flex justify-between text-[11px] text-slate-500"><span>{completed + failed} of {total} processed</span><span className="flex items-center gap-1"><FaClock /> {formatTime}</span></div></div>
+        <div className="mb-5 grid grid-cols-3 gap-2.5">{stats.map(([label, value, color, bg]) => <div key={label} className={`rounded-2xl border border-white/10 ${bg} p-3`}><div className={`text-2xl font-bold ${color}`}>{value}</div><div className="mt-1 text-[9px] font-bold uppercase tracking-widest text-slate-500">{label}</div></div>)}</div>
+        <div className="mb-6 grid gap-3 sm:grid-cols-2"><div className="rounded-2xl border border-white/10 bg-white/[.04] p-4"><div className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-500"><FaGlobe className="text-cyan-400" /> Target</div><p className="break-all font-mono text-xs text-slate-200">{url}</p></div><div className="rounded-2xl border border-white/10 bg-white/[.04] p-4"><div className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-500"><FaNetworkWired className="text-blue-400" /> Client IP</div><p className="font-mono text-xs text-slate-200">{ip}</p></div></div>
+        <div className="mb-6 flex flex-wrap gap-2 text-[10px] font-semibold text-slate-300"><span className="flex items-center gap-1.5 rounded-full border border-violet-400/20 bg-violet-400/10 px-3 py-1.5"><FaShieldAlt className="text-violet-300" /> {options.trafficMode || 'stealth'} mode</span><span className="flex items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1.5"><FaLayerGroup className="text-cyan-300" /> Batch {options.maxBatchVisits || 1}</span>{progress?.totalLoops > 1 && <span className="flex items-center gap-1.5 rounded-full border border-fuchsia-400/20 bg-fuchsia-400/10 px-3 py-1.5"><FaCheckCircle className="text-fuchsia-300" /> Loop {progress.currentLoop || 1}/{progress.totalLoops}</span>}</div>
+        <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: .98 }} onClick={onStop} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-rose-600 to-red-500 py-4 text-sm font-bold uppercase tracking-widest shadow-lg shadow-red-950/30"><FaStop className="text-xs" /> Stop automation</motion.button><p className="mt-3 text-center text-[10px] text-slate-600">You can safely stop the session at any time.</p>
       </div>
     </motion.div>
-  );
+  </motion.div>;
 }
 
 export default LoadingScreen;
