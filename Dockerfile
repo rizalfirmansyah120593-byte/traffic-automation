@@ -24,10 +24,10 @@ WORKDIR /app
 
 # Environment configuration
 ENV NODE_ENV=production
-ENV PORT=7860
+ENV PORT=10000
 
 # Expose port
-EXPOSE 7860
+EXPOSE 10000
 
 # Start application
 CMD ["node", "backend/server.js"]
