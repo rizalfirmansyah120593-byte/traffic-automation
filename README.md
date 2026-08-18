@@ -114,6 +114,25 @@ use `node backend/server.js` as the start command. Hostinger supplies the
 ## 🛡️ Responsible Usage
 Web Traffic Lab is designed for **testing and development purposes only**. Users are responsible for ensuring their automation activities comply with the Terms of Service of the target websites and all applicable laws.
 
+### Safety controls
+
+The API includes built-in runtime safeguards:
+
+- One active automation job by default (`MAX_ACTIVE_JOBS=1`).
+- Five automation requests per client IP per minute by default (`AUTOMATE_RATE_LIMIT=5`).
+- Optional target-domain allowlist using comma-separated `ALLOWED_DOMAINS`, for example `staging.example.com,example.org`.
+- `/api/health` reports active jobs and the current safety configuration.
+
+For an authorized staging environment, configure these environment variables before starting:
+
+```text
+MAX_ACTIVE_JOBS=1
+AUTOMATE_RATE_LIMIT=5
+ALLOWED_DOMAINS=staging.example.com
+```
+
+Leave `ALLOWED_DOMAINS` empty only when the service is protected by another access-control layer and all targets are explicitly authorized.
+
 ---
 
 ## 📄 License

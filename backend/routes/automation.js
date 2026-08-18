@@ -13,6 +13,39 @@ const dns = require('dns').promises;
 const ipaddr = require('ipaddr.js');
 const { automateWebsite } = require('../services/playwright');
 
+// Process-wide safety guards. Configure these with environment variables in production.
+const activeJobs = new Set();
+const requestWindows = new Map();
+const MAX_ACTIVE_JOBS = Math.max(1, Number(process.env.MAX_ACTIVE_JOBS || 1));
+const RATE_LIMIT_PER_MINUTE = Math.max(1, Number(process.env.AUTOMATE_RATE_LIMIT || 5));
+
+function clientKey(req) {
+  return (req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown')
+    .toString().split(',')[0].trim();
+}
+
+function allowedDomain(hostname) {
+  const configured = (process.env.ALLOWED_DOMAINS || '').split(',').map(v => v.trim().toLowerCase()).filter(Boolean);
+  if (!configured.length) return true;
+  const host = hostname.toLowerCase().replace(/^www\./, '');
+  return configured.some(domain => {
+    const normalized = domain.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
+    return host === normalized || host.endsWith(`.${normalized}`);
+  });
+}
+
+function rateLimited(key) {
+  const now = Date.now();
+  const recent = (requestWindows.get(key) || []).filter(time => now - time < 60_000);
+  if (recent.length >= RATE_LIMIT_PER_MINUTE) {
+    requestWindows.set(key, recent);
+    return true;
+  }
+  recent.push(now);
+  requestWindows.set(key, recent);
+  return false;
+}
+
 /**
  * Robust SSRF validation: Resolves hostname and checks if IP is private/local.
  */
@@ -60,6 +93,13 @@ function isValidUrl(string) {
 }
 
 router.post('/automate', async (req, res) => {
+  const requester = clientKey(req);
+  if (rateLimited(requester)) {
+    return res.status(429).json({ success: false, error: 'Too many automation requests. Try again later.' });
+  }
+  if (activeJobs.size >= MAX_ACTIVE_JOBS) {
+    return res.status(429).json({ success: false, error: 'Another automation job is running. Please wait.' });
+  }
   const { url, options = {} } = req.body;
   const safeOptions = options && typeof options === 'object' ? options : {};
   const maxVisitsFromEnv = process.env.MAX_VISITS === undefined ? 1000 : Number(process.env.MAX_VISITS);
@@ -77,6 +117,11 @@ router.post('/automate', async (req, res) => {
   
   if (!isValidUrl(processedUrl)) {
     return res.status(400).json({ success: false, error: 'Invalid URL format' });
+  }
+
+  const targetUrl = new URL(processedUrl);
+  if (!['http:', 'https:'].includes(targetUrl.protocol) || !allowedDomain(targetUrl.hostname)) {
+    return res.status(403).json({ success: false, error: 'This target domain is not allowed by the safety policy.' });
   }
   
   // Robust SSRF Protection
@@ -173,6 +218,10 @@ router.post('/automate', async (req, res) => {
     }
   };
   
+  const jobId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  activeJobs.add(jobId);
+  console.log(`[AUDIT] job=${jobId} client=${requester} target=${targetUrl.hostname} visits=${visitCount * loopCount}`);
+
   try {
     const result = await automateWebsite(processedUrl, { ...safeOptions, visitCount, loopCount, maxBatchVisits, trafficMode, maxVisits: MAX_VISITS }, onProgress);
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
@@ -192,6 +241,8 @@ router.post('/automate', async (req, res) => {
       res.write(`data: ${JSON.stringify({ type: 'result', data: { success: false, error: error.message || 'Automation failed' } })}\n\n`);
       res.end();
     }
+  } finally {
+    activeJobs.delete(jobId);
   }
 });
 
@@ -200,7 +251,13 @@ router.get('/health', (req, res) => {
   res.json({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
-    uptime: process.uptime()
+    uptime: process.uptime(),
+    activeJobs: activeJobs.size,
+    maxActiveJobs: MAX_ACTIVE_JOBS,
+    safety: {
+      rateLimitPerMinute: RATE_LIMIT_PER_MINUTE,
+      domainAllowlistEnabled: Boolean(process.env.ALLOWED_DOMAINS)
+    }
   });
 });
 
