@@ -17,6 +17,16 @@
 process.env.PLAYWRIGHT_BROWSERS_PATH = '0';
 
 const { chromium } = require('./stealth');
+const fs = require('fs');
+
+// Some Hostinger builds extract Chromium without the executable bit.
+// Restore it before the first launch; ignore the error on platforms where
+// file permissions are not applicable (for example Windows).
+try {
+  fs.chmodSync(chromium.executablePath(), 0o755);
+} catch (error) {
+  console.warn('Could not update Chromium executable permissions:', error.message);
+}
 
 /**
  * USER_AGENTS: A pool of 30 realistic device identifiers.
