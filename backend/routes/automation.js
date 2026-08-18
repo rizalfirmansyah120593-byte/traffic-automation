@@ -205,8 +205,12 @@ router.get('/health', (req, res) => {
 });
 
 router.get('/my-ip', (req, res) => {
-  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-  res.json({ ip: ip.replace('::ffff:', '') });
+  // Proxies may append the same address multiple times to x-forwarded-for.
+  // Show only the first client address, as a normal browser would see it.
+  const forwarded = req.headers['x-forwarded-for'];
+  const rawIp = forwarded ? forwarded.split(',')[0].trim() : req.socket.remoteAddress;
+  const ip = (rawIp || 'Unavailable').replace(/^::ffff:/, '');
+  res.json({ ip });
 });
 
 module.exports = router;
