@@ -8,6 +8,8 @@ import IPDisplay from './components/IPDisplay';
 import LoadingScreen from './components/LoadingScreen';
 import { useLanguage } from './i18n';
 import AdSlot from './components/AdSlot';
+import UsageGuide from './components/UsageGuide';
+import Footer from './components/Footer';
 
 function App() {
   const { language, setLanguage, languages, t } = useLanguage();
@@ -202,13 +204,15 @@ function App() {
         <div className="my-6 flex justify-center md:hidden"><AdSlot type="mobile" /></div>
         
         <HistoryList history={history} onSelect={handleAutomate} />
+        <div id="usage-guide"><UsageGuide /></div>
+        <Footer />
         
         {/* Usage Guide Footer */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.5 }}
-          className="mt-16 mb-8"
+           className="hidden mt-16 mb-8"
         >
           <div className="neon-panel rounded-2xl p-8">
             <h2 className="text-3xl font-bold text-white mb-6 text-center">
@@ -378,7 +382,7 @@ function App() {
                 <p className="text-gray-300">✈️ Telegram: <a href="https://t.me/SyntaxSouq" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 transition-colors">@SyntaxSouq</a> <span className="text-green-400 text-xs">(fastest reply)</span></p>
               </div>
               <p>For more information, check the project documentation or contact the developer.</p>
-              <p className="mt-2">Made with ❤️</p>
+              <p className="mt-2">Made with ❤️ Rizal Firmansyah</p>
             </div>
           </div>
         </motion.div>
