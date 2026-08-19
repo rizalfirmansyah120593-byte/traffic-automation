@@ -519,7 +519,7 @@ function normalizeErrorMessage(error) {
   return error.message;
 }
 
-async function runSingleVisit({ url, profile, browser, captureScreenshot, pageDwellTime = 15000 }) {
+async function runSingleVisit({ url, profile, browser, captureScreenshot, pageDwellTime = 180000 }) {
   const visitStartTime = Date.now();
   let context;
   
@@ -1008,7 +1008,7 @@ async function automateStealthTraffic(url, options = {}, onProgress = null) {
           profile,
           browser,
           captureScreenshot: shouldCaptureScreenshot
-          ,pageDwellTime: Number(options.pageDwellTime) || 15000
+          ,pageDwellTime: Number(options.pageDwellTime) || 180000
         }).then(result => {
           completedCount++;
           if (result.success) {
@@ -1538,7 +1538,7 @@ async function automateSearchEngineTraffic(url, options = {}, onProgress = null)
           profile,
           browser,
           captureScreenshot: captureScreenshots && i === 0,
-          pageDwellTime: Number(options.pageDwellTime) || 15000
+          pageDwellTime: Number(options.pageDwellTime) || 180000
         }).then(result => {
           completedCount++;
           if (result.success) {
@@ -1640,7 +1640,7 @@ async function automateSearchEngineTraffic(url, options = {}, onProgress = null)
 }
 
 // Single search engine visit - organic flow (Simplified & Improved)
-async function runSearchEngineVisit({ targetUrl, searchEngine, profile, browser, captureScreenshot, pageDwellTime = 15000 }) {
+async function runSearchEngineVisit({ targetUrl, searchEngine, profile, browser, captureScreenshot, pageDwellTime = 180000 }) {
   const visitStartTime = Date.now();
 
   const context = await browser.newContext({
