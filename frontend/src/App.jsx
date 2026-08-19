@@ -7,6 +7,7 @@ import HistoryList from './components/HistoryList';
 import IPDisplay from './components/IPDisplay';
 import LoadingScreen from './components/LoadingScreen';
 import { useLanguage } from './i18n';
+import AdSlot from './components/AdSlot';
 
 function App() {
   const { language, setLanguage, languages, t } = useLanguage();
@@ -190,11 +191,15 @@ function App() {
         </motion.div>
         
         <URLInput onSubmit={handleAutomate} />
+        <div className="mb-8 flex justify-center"><AdSlot type="native" /></div>
         
         {loading && <LoadingScreen progress={progress} onStop={handleStop} url={currentUrl} options={progressRef.current?.options} />}
         
         {result && result.cancelled && <CancelledResult data={result} onResume={handleResume} />}
         {result && !result.cancelled && <ResultCard data={result} />}
+
+        <div className="my-8 hidden justify-center md:flex"><AdSlot type="desktop" /></div>
+        <div className="my-6 flex justify-center md:hidden"><AdSlot type="mobile" /></div>
         
         <HistoryList history={history} onSelect={handleAutomate} />
         

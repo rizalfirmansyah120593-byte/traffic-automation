@@ -106,6 +106,16 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.ad-slot {
+  min-height: 50px;
+  max-width: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ad-slot iframe { max-width: 100%; border: 0; }
+
 /* Automation status must remain visually above the dashboard. */
 .loading-overlay {
   position: fixed;
