@@ -6,8 +6,10 @@ import CancelledResult from './components/CancelledResult';
 import HistoryList from './components/HistoryList';
 import IPDisplay from './components/IPDisplay';
 import LoadingScreen from './components/LoadingScreen';
+import { useLanguage } from './i18n';
 
 function App() {
+  const { language, setLanguage, languages, t } = useLanguage();
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(null);
@@ -169,6 +171,7 @@ function App() {
     <div className="min-h-screen relative overflow-hidden bg-transparent">
       <div className="ambient-orb ambient-orb-one" aria-hidden="true" />
       <div className="ambient-orb ambient-orb-two" aria-hidden="true" />
+      <div className="fixed right-4 top-4 z-40"><label className="sr-only">{t('language')}</label><select value={language} onChange={e => setLanguage(e.target.value)} className="rounded-xl border border-white/15 bg-slate-900/90 px-3 py-2 text-xs text-white shadow-lg backdrop-blur-md">{languages.map(item => <option key={item.code} value={item.code}>{item.flag} {item.label}</option>)}</select></div>
       <IPDisplay />
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <motion.div
