@@ -38,13 +38,15 @@ function App() {
     const controller = new AbortController();
     setAbortController(controller);
     
-    const totalVisits = (options.visitCount || 1) * (options.loopCount || 1);
+    const urlCount = Array.isArray(options.batchUrls) && options.batchUrls.length ? options.batchUrls.length : 1;
+    const totalVisits = (options.visitCount || 1) * (options.loopCount || 1) * urlCount;
     progressRef.current = { 
       completed: 0, 
       remaining: totalVisits, 
       failed: 0,
       currentLoop: 1,
       totalLoops: options.loopCount || 1,
+      totalUrls: urlCount,
       options
     };
     setProgress(progressRef.current);
@@ -96,6 +98,9 @@ function App() {
                   failed: data.failed,
                   currentLoop: data.currentLoop,
                   totalLoops: data.totalLoops
+                  ,currentUrl: data.currentUrl
+                  ,completedUrls: data.completedUrls
+                  ,totalUrls: data.totalUrls
                 };
                 progressRef.current = newProgress;
                 setProgress(newProgress);

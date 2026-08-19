@@ -27,7 +27,12 @@ function URLInput({ onSubmit }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const processedUrls = url.split(/[\n,]+/).map(item => item.trim()).filter(Boolean).slice(0, 3);
+    const rawUrls = url.split(/[\n,]+/).map(item => item.trim()).filter(Boolean);
+    if (rawUrls.length > 3) {
+      setError('Maksimal 3 URL yang dapat diproses sekaligus');
+      return;
+    }
+    const processedUrls = rawUrls.map(item => /^https?:\/\//i.test(item) ? item : `https://${item}`);
     let processedUrl = processedUrls[0] || '';
     
     if (!processedUrl) {

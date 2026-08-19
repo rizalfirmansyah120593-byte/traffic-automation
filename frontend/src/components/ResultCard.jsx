@@ -35,6 +35,13 @@ function ResultCard({ data }) {
   const safeActiveIndex = visits ? Math.min(activeVisitIndex, visits.length - 1) : 0;
   const active = visits ? visits[safeActiveIndex] : data;
 
+  if (data.batch && Array.isArray(data.results)) {
+    return <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+      <div className="mb-5 flex items-center justify-between"><div><h3 className="text-2xl font-bold text-white">{labels.success}</h3><p className="mt-1 text-sm text-slate-400">{data.summary?.successes || 0} / {data.summary?.total || data.results.length} URL berhasil diproses secara berurutan.</p></div><span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1.5 text-xs font-semibold text-cyan-300">Sequential batch</span></div>
+      <div className="grid gap-5 xl:grid-cols-2">{data.results.map((item, index) => <div key={`${item.url || index}-${index}`} className="rounded-2xl border border-white/10 bg-slate-900/70 p-2 shadow-xl"><div className="border-b border-white/10 px-4 py-3"><p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">URL {index + 1}</p><p className="mt-1 break-all font-mono text-xs text-slate-300">{item.url || data.urls?.[index]}</p></div><ResultCard data={item} /></div>)}</div>
+    </motion.section>;
+  }
+
   if (!data.success) {
     return (
       <motion.div 
