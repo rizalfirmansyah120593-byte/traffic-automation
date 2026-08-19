@@ -1,8 +1,17 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaCheckCircle, FaTimesCircle, FaClock, FaBolt, FaGlobe, FaShieldAlt, FaExternalLinkAlt, FaHistory, FaMobile, FaDesktop, FaTablet, FaRobot, FaNetworkWired, FaMapMarkerAlt } from 'react-icons/fa';
+import { useLanguage } from '../i18n';
 
 function ResultCard({ data }) {
+  const { language } = useLanguage();
+  const labels = {
+    id: { success: 'Automation Berhasil', failed: 'Automation Gagal', mode: 'Mode Traffic', total: 'Total Waktu', load: 'Waktu Muat', ttfb: 'TTFB', dom: 'DOM Siap', ip: 'Alamat IP', status: 'Status', behavior: 'Simulasi Perilaku Browser', device: 'Jenis Perangkat', viewport: 'Viewport', agent: 'User Agent', timezone: 'Zona Waktu', platform: 'Platform', geo: 'Geolocation', webgl: 'WebGL', audit: 'Log Audit', duration: 'Durasi', engine: 'Mesin Pencari', screenshot: 'Screenshot', console: 'Log Console', url: 'URL' },
+    en: { success: 'Automation Successful', failed: 'Automation Failed', mode: 'Traffic Mode', total: 'Total Time', load: 'Load Time', ttfb: 'TTFB', dom: 'DOM Ready', ip: 'IP Address', status: 'Status', behavior: 'Human Behavior Simulation', device: 'Device Type', viewport: 'Viewport', agent: 'User Agent', timezone: 'Timezone', platform: 'Platform', geo: 'Geolocation', webgl: 'WebGL', audit: 'Audit Log', duration: 'Duration', engine: 'Search Engine', screenshot: 'Screenshot', console: 'Console Logs', url: 'URL' },
+    es: { success: 'Automatización exitosa', failed: 'Automatización fallida', mode: 'Modo de tráfico', total: 'Tiempo total', load: 'Tiempo de carga', ttfb: 'TTFB', dom: 'DOM listo', ip: 'Dirección IP', status: 'Estado', behavior: 'Simulación de comportamiento', device: 'Tipo de dispositivo', viewport: 'Viewport', agent: 'User Agent', timezone: 'Zona horaria', platform: 'Plataforma', geo: 'Geolocalización', webgl: 'WebGL', audit: 'Registro de auditoría', duration: 'Duración', engine: 'Buscador', screenshot: 'Captura', console: 'Registros de consola', url: 'URL' },
+    fr: { success: 'Automatisation réussie', failed: 'Échec de l’automatisation', mode: 'Mode trafic', total: 'Temps total', load: 'Temps de chargement', ttfb: 'TTFB', dom: 'DOM prêt', ip: 'Adresse IP', status: 'Statut', behavior: 'Simulation du comportement', device: 'Type d’appareil', viewport: 'Viewport', agent: 'User Agent', timezone: 'Fuseau horaire', platform: 'Plateforme', geo: 'Géolocalisation', webgl: 'WebGL', audit: 'Journal d’audit', duration: 'Durée', engine: 'Moteur de recherche', screenshot: 'Capture', console: 'Journaux console', url: 'URL' },
+    de: { success: 'Automation erfolgreich', failed: 'Automation fehlgeschlagen', mode: 'Traffic-Modus', total: 'Gesamtzeit', load: 'Ladezeit', ttfb: 'TTFB', dom: 'DOM bereit', ip: 'IP-Adresse', status: 'Status', behavior: 'Simulation des Browserverhaltens', device: 'Gerätetyp', viewport: 'Viewport', agent: 'User-Agent', timezone: 'Zeitzone', platform: 'Plattform', geo: 'Geolocation', webgl: 'WebGL', audit: 'Audit-Protokoll', duration: 'Dauer', engine: 'Suchmaschine', screenshot: 'Screenshot', console: 'Konsolenprotokolle', url: 'URL' }
+  }[language] || {};
   const visits = Array.isArray(data.visits) ? data.visits : null;
   const isMulti = Boolean(visits && visits.length > 1);
   const [activeVisitIndex, setActiveVisitIndex] = useState(0);
@@ -35,7 +44,7 @@ function ResultCard({ data }) {
       >
         <div className="flex items-center gap-3 mb-4">
           <FaTimesCircle className="text-3xl text-red-400" />
-          <h3 className="text-2xl font-bold">Automation Failed</h3>
+          <h3 className="text-2xl font-bold">{labels.failed}</h3>
         </div>
         <p className="text-gray-300 mb-4">{data.error}</p>
         {data.url && (
@@ -74,12 +83,12 @@ function ResultCard({ data }) {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <FaCheckCircle className="text-3xl text-green-400" />
-          <h3 className="text-2xl font-bold text-white">Automation Successful</h3>
+          <h3 className="text-2xl font-bold text-white">{labels.success}</h3>
         </div>
         <div className="flex items-center gap-3">
           {data.summary?.trafficMode && (
             <div className="bg-blue-500/20 px-4 py-2 rounded-lg border border-blue-500/30">
-              <p className="text-xs text-gray-400">Traffic Mode</p>
+              <p className="text-xs text-gray-400">{labels.mode}</p>
               <p className="text-sm font-bold text-blue-300">
                 {data.summary.trafficMode === 'stealth' && '🛡️ Stealth'}
                 {data.summary.trafficMode === 'storm' && '⚡ Storm'}
@@ -89,7 +98,7 @@ function ResultCard({ data }) {
           )}
           {data.duration && (
             <div className="bg-purple-500/20 px-4 py-2 rounded-lg border border-purple-500/30">
-              <p className="text-sm text-gray-400">Total Time</p>
+              <p className="text-sm text-gray-400">{labels.total}</p>
               <p className="text-xl font-bold text-purple-300">{data.duration}s</p>
             </div>
           )}
@@ -137,31 +146,31 @@ function ResultCard({ data }) {
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
         <StatBox 
           icon={<FaClock />} 
-          label="Load Time" 
+          label={labels.load} 
           value={`${(active.loadTime || 0).toFixed(0)}ms`} 
           color="blue"
         />
         <StatBox 
           icon={<FaBolt />} 
-          label="TTFB" 
+          label={labels.ttfb} 
           value={`${(active.ttfb || 0).toFixed(0)}ms`} 
           color="yellow"
         />
         <StatBox 
           icon={<FaClock />} 
-          label="DOM Ready" 
+          label={labels.dom} 
           value={`${(active.domReady || 0).toFixed(0)}ms`} 
           color="cyan"
         />
         <StatBox 
           icon={<FaGlobe />} 
-          label="IP Address" 
+          label={labels.ip} 
           value={active.ip || 'Unavailable'} 
           color="green"
         />
         <StatBox 
           icon={<FaShieldAlt />} 
-          label="Status" 
+          label={labels.status} 
           value={`${active.statusCode || ''}`} 
           color="purple"
         />
@@ -171,11 +180,11 @@ function ResultCard({ data }) {
         <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl p-4 mb-6 border border-blue-500/20">
           <div className="flex items-center gap-2 mb-3">
             <FaRobot className="text-blue-400" />
-            <h4 className="text-white font-semibold">Human Behavior Simulation</h4>
+            <h4 className="text-white font-semibold">{labels.behavior}</h4>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="bg-white/5 rounded-lg p-3">
-              <p className="text-gray-400 text-xs mb-1">Device Type</p>
+              <p className="text-gray-400 text-xs mb-1">{labels.device}</p>
               <div className="flex items-center gap-2">
                 {active.deviceType === 'mobile' ? <FaMobile className="text-green-400" /> : 
                  active.deviceType === 'tablet' ? <FaTablet className="text-yellow-400" /> : 
@@ -184,26 +193,26 @@ function ResultCard({ data }) {
               </div>
             </div>
             <div className="bg-white/5 rounded-lg p-3">
-              <p className="text-gray-400 text-xs mb-1">Viewport</p>
+              <p className="text-gray-400 text-xs mb-1">{labels.viewport}</p>
               <p className="text-white text-sm">{active.viewport ? `${active.viewport.width}×${active.viewport.height}` : '1920×1080'}</p>
             </div>
             <div className="bg-white/5 rounded-lg p-3 col-span-2">
-              <p className="text-gray-400 text-xs mb-1">User Agent</p>
+              <p className="text-gray-400 text-xs mb-1">{labels.agent}</p>
               <p className="text-white text-xs font-mono truncate" title={active.userAgent}>{active.userAgent || 'Chrome 120'}</p>
             </div>
             <div className="bg-white/5 rounded-lg p-3">
-              <p className="text-gray-400 text-xs mb-1">Timezone</p>
+              <p className="text-gray-400 text-xs mb-1">{labels.timezone}</p>
               <p className="text-white text-sm">{active.timezoneId || '—'}</p>
             </div>
             <div className="bg-white/5 rounded-lg p-3">
-              <p className="text-gray-400 text-xs mb-1">Platform</p>
+              <p className="text-gray-400 text-xs mb-1">{labels.platform}</p>
               <p className="text-white text-sm">{active.platform || '—'}</p>
             </div>
             {active.geolocation && (
               <div className="bg-white/5 rounded-lg p-3 col-span-2">
                 <p className="text-gray-400 text-xs mb-1">
                   <FaMapMarkerAlt className="inline mr-1 text-red-400" />
-                  Geolocation
+                  {labels.geo}
                 </p>
                 <p className="text-white text-sm">
                   {active.geolocation.city}, {active.geolocation.country}
@@ -214,7 +223,7 @@ function ResultCard({ data }) {
               </div>
             )}
             <div className="bg-white/5 rounded-lg p-3 col-span-2">
-              <p className="text-gray-400 text-xs mb-1">WebGL</p>
+              <p className="text-gray-400 text-xs mb-1">{labels.webgl}</p>
               <p className="text-white text-xs font-mono truncate" title={active.webgl ? `${active.webgl.vendor} | ${active.webgl.renderer}` : ''}>
                 {active.webgl ? `${active.webgl.vendor} | ${active.webgl.renderer}` : '—'}
               </p>
@@ -242,7 +251,7 @@ function ResultCard({ data }) {
 
       {isMulti && visits && (
         <div className="bg-white/5 rounded-xl p-4 mb-6 border border-white/10">
-          <h4 className="text-white font-semibold mb-3">Audit Log</h4>
+          <h4 className="text-white font-semibold mb-3">{labels.audit}</h4>
           <div className="flex flex-wrap gap-2">
             {visits.map((v, idx) => (
               <button
@@ -270,15 +279,15 @@ function ResultCard({ data }) {
             <div className="mt-4 bg-black/20 rounded-lg p-4 border border-white/5">
               <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-3">
                 <div>
-                  <p className="text-gray-400 text-xs mb-1">Duration</p>
+                  <p className="text-gray-400 text-xs mb-1">{labels.duration}</p>
                   <p className="text-white font-semibold">{active.duration}s</p>
                 </div>
                 <div>
-                  <p className="text-gray-400 text-xs mb-1">Status</p>
+                  <p className="text-gray-400 text-xs mb-1">{labels.status}</p>
                   <p className="text-white font-semibold">{active.statusCode || '—'}</p>
                 </div>
                 <div>
-                  <p className="text-gray-400 text-xs mb-1">IP Address</p>
+                  <p className="text-gray-400 text-xs mb-1">{labels.ip}</p>
                   <p className="text-white font-semibold font-mono text-sm">{active.ip || '—'}</p>
                 </div>
                 <div>
@@ -287,14 +296,14 @@ function ResultCard({ data }) {
                 </div>
                 {active.searchEngine && (
                   <div>
-                    <p className="text-gray-400 text-xs mb-1">Search Engine</p>
+                    <p className="text-gray-400 text-xs mb-1">{labels.engine}</p>
                     <p className="text-white font-semibold text-sm">
                       {active.searchEngineIcon || '🔍'} {active.searchEngine}
                     </p>
                   </div>
                 )}
               </div>
-              <p className="text-gray-400 text-xs mb-1">URL</p>
+              <p className="text-gray-400 text-xs mb-1">{labels.url}</p>
               <p className="text-gray-300 text-sm break-all">
                 {active.url}
               </p>
@@ -331,7 +340,7 @@ function ResultCard({ data }) {
       
       {(active.screenshot || data.screenshot) && (
         <div className="mb-6">
-          <h4 className="text-white font-semibold mb-3">Screenshot</h4>
+          <h4 className="text-white font-semibold mb-3">{labels.screenshot}</h4>
           <div className="relative group">
             <img 
               src={`data:image/jpeg;base64,${active.screenshot || data.screenshot}`} 
@@ -348,7 +357,7 @@ function ResultCard({ data }) {
       {active.consoleLogs && active.consoleLogs.length > 0 && (
         <div>
           <h4 className="text-white font-semibold mb-3">
-            Console Logs ({active.consoleLogs.length})
+            {labels.console} ({active.consoleLogs.length})
           </h4>
           <div className="bg-black/30 rounded-xl p-4 max-h-64 overflow-y-auto">
             {active.consoleLogs.map((log, idx) => (
