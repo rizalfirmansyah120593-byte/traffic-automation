@@ -1936,11 +1936,14 @@ async function runSearchEngineVisit({ targetUrl, searchEngine, profile, browser,
               continue; // Skip non-absolute URLs
             }
             
-            const hrefUrl = new URL(href);
-            hrefHostname = hrefUrl.hostname.replace(/^www\./, ''); // Normalize
+            const hrefUrl = new URL(href, searchEngine.url);
+            const redirectValue = hrefUrl.searchParams.get('uddg') || hrefUrl.searchParams.get('url') || hrefUrl.searchParams.get('q');
+            if (redirectValue && /^https?:\/\//i.test(redirectValue)) actualUrl = redirectValue;
+            const actualParsedUrl = new URL(actualUrl, searchEngine.url);
+            hrefHostname = actualParsedUrl.hostname.replace(/^www\./, '').toLowerCase(); // Normalize
             
             // Check for EXACT hostname match
-            if (hrefHostname !== baseDomain) {
+            if (hrefHostname !== baseDomain.toLowerCase()) {
               // Not an exact match, skip
               continue;
             }
