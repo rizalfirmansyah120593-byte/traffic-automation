@@ -23,7 +23,8 @@ function AdSlot({ type = 'native', className = '' }) {
     } else {
       const sizes = {
         mobile: { key: '2a79003b866dd3632f40252fa5f3cd0a', width: 320, height: 50 },
-        desktop: { key: 'c195f1d2570360660a7fe3950bba3851', width: 728, height: 90 }
+        desktop: { key: 'c195f1d2570360660a7fe3950bba3851', width: 728, height: 90 },
+        square: { key: '5c287de8d65bfa164e731aa1eb43ca1f', width: 300, height: 250 }
       };
       const ad = sizes[type] || sizes.desktop;
       window.atOptions = { key: ad.key, format: 'iframe', height: ad.height, width: ad.width, params: {} };

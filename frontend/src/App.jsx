@@ -205,6 +205,7 @@ function App() {
         
         <HistoryList history={history} onSelect={handleAutomate} />
         <div id="usage-guide"><UsageGuide /></div>
+        <div className="my-10 flex justify-center"><AdSlot type="square" /></div>
         <Footer />
         
         {/* Usage Guide Footer */}
