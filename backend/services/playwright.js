@@ -519,7 +519,7 @@ function normalizeErrorMessage(error) {
   return error.message;
 }
 
-async function runSingleVisit({ url, profile, browser, captureScreenshot }) {
+async function runSingleVisit({ url, profile, browser, captureScreenshot, pageDwellTime = 15000 }) {
   const visitStartTime = Date.now();
   let context;
   
@@ -726,6 +726,8 @@ async function runSingleVisit({ url, profile, browser, captureScreenshot }) {
       await page.waitForTimeout(5000);
     }
 
+    // Keep the target page open for the configured dwell time after it is ready.
+    await page.waitForTimeout(pageDwellTime);
     await randomDelay(900, 1900);
     await simulateTabFocusBlur(page, profile.behavior);
     await simulateHumanMouse(page, profile.behavior);
@@ -1006,6 +1008,7 @@ async function automateStealthTraffic(url, options = {}, onProgress = null) {
           profile,
           browser,
           captureScreenshot: shouldCaptureScreenshot
+          ,pageDwellTime: Number(options.pageDwellTime) || 15000
         }).then(result => {
           completedCount++;
           if (result.success) {
@@ -1534,7 +1537,8 @@ async function automateSearchEngineTraffic(url, options = {}, onProgress = null)
           searchEngine: selectedEngine,
           profile,
           browser,
-          captureScreenshot: captureScreenshots && i === 0
+          captureScreenshot: captureScreenshots && i === 0,
+          pageDwellTime: Number(options.pageDwellTime) || 15000
         }).then(result => {
           completedCount++;
           if (result.success) {
@@ -1636,7 +1640,7 @@ async function automateSearchEngineTraffic(url, options = {}, onProgress = null)
 }
 
 // Single search engine visit - organic flow (Simplified & Improved)
-async function runSearchEngineVisit({ targetUrl, searchEngine, profile, browser, captureScreenshot }) {
+async function runSearchEngineVisit({ targetUrl, searchEngine, profile, browser, captureScreenshot, pageDwellTime = 15000 }) {
   const visitStartTime = Date.now();
 
   const context = await browser.newContext({
@@ -2015,7 +2019,7 @@ async function runSearchEngineVisit({ targetUrl, searchEngine, profile, browser,
 
       // Wait for navigation to target website
       await page.waitForLoadState('domcontentloaded', { timeout: 15000 });
-      await page.waitForTimeout(randomBetween(3000, 6000));
+      await page.waitForTimeout(pageDwellTime);
 
       // Step 7: Simulate browsing on target website
       await simulateTabFocusBlur(page, profile.behavior);
