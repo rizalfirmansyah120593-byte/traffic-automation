@@ -1896,7 +1896,7 @@ async function runSearchEngineVisit({ targetUrl, searchEngine, profile, browser,
       
       let clicked = false;
       let checkedCount = 0;
-      const maxLinksToCheck = 50; // Only check first 50 links for performance
+      const maxLinksToCheck = 200; // Count only candidate result links
       
       for (let link of links) {
         if (checkedCount >= maxLinksToCheck) {
@@ -1907,8 +1907,6 @@ async function runSearchEngineVisit({ targetUrl, searchEngine, profile, browser,
         try {
           const href = await link.getAttribute('href');
           if (!href) continue;
-          
-          checkedCount++;
           
           // Skip search engine internal links
           const isSearchInternalLink = href.includes('/search?') || 
@@ -1926,18 +1924,22 @@ async function runSearchEngineVisit({ targetUrl, searchEngine, profile, browser,
             continue;
           }
           
+          checkedCount++;
+
           // EXACT DOMAIN MATCHING: Parse the href and check if hostname EXACTLY matches
           let hrefHostname = null;
           let actualUrl = href;
           
           try {
-            // Handle relative URLs
-            if (!href.startsWith('http')) {
-              continue; // Skip non-absolute URLs
-            }
-            
             const hrefUrl = new URL(href, searchEngine.url);
-            const redirectValue = hrefUrl.searchParams.get('uddg') || hrefUrl.searchParams.get('url') || hrefUrl.searchParams.get('q');
+            let redirectValue = hrefUrl.searchParams.get('uddg') || hrefUrl.searchParams.get('url') || hrefUrl.searchParams.get('q');
+            const encodedBingUrl = hrefUrl.searchParams.get('u');
+            if (!redirectValue && encodedBingUrl && encodedBingUrl.startsWith('a1')) {
+              try {
+                const encoded = encodedBingUrl.slice(2).replace(/-/g, '+').replace(/_/g, '/');
+                redirectValue = Buffer.from(encoded, 'base64').toString('utf8');
+              } catch {}
+            }
             if (redirectValue && /^https?:\/\//i.test(redirectValue)) actualUrl = redirectValue;
             const actualParsedUrl = new URL(actualUrl, searchEngine.url);
             hrefHostname = actualParsedUrl.hostname.replace(/^www\./, '').toLowerCase(); // Normalize
