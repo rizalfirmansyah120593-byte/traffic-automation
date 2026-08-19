@@ -102,6 +102,10 @@ router.post('/automate', async (req, res) => {
   }
   const { url, options = {} } = req.body;
   const safeOptions = options && typeof options === 'object' ? options : {};
+  const requestedBatchUrls = Array.isArray(safeOptions.batchUrls) ? safeOptions.batchUrls : [url];
+  if (requestedBatchUrls.length < 1 || requestedBatchUrls.length > 3) {
+    return res.status(400).json({ success: false, error: 'batchUrls must contain between 1 and 3 URLs' });
+  }
   const maxVisitsFromEnv = process.env.MAX_VISITS === undefined ? 1000 : Number(process.env.MAX_VISITS);
   const MAX_VISITS = Number.isInteger(maxVisitsFromEnv) && maxVisitsFromEnv >= 1 ? maxVisitsFromEnv : 1000;
   
@@ -127,6 +131,17 @@ router.post('/automate', async (req, res) => {
   // Robust SSRF Protection
   if (!(await isSafeUrl(processedUrl))) {
     return res.status(400).json({ success: false, error: 'Access to local or private addresses is restricted for security' });
+  }
+
+  const batchUrls = [];
+  for (const candidate of requestedBatchUrls) {
+    let normalized = String(candidate || '').trim();
+    if (!/^https?:\/\//i.test(normalized)) normalized = `https://${normalized}`;
+    const parsed = new URL(normalized);
+    if (!isValidUrl(normalized) || !['http:', 'https:'].includes(parsed.protocol) || !allowedDomain(parsed.hostname) || !(await isSafeUrl(normalized))) {
+      return res.status(400).json({ success: false, error: `Unsafe or invalid batch URL: ${candidate}` });
+    }
+    batchUrls.push(normalized);
   }
 
   const visitCountRaw = safeOptions.visitCount;
@@ -223,7 +238,24 @@ router.post('/automate', async (req, res) => {
   console.log(`[AUDIT] job=${jobId} client=${requester} target=${targetUrl.hostname} visits=${visitCount * loopCount}`);
 
   try {
-    const result = await automateWebsite(processedUrl, { ...safeOptions, visitCount, loopCount, maxBatchVisits, trafficMode, maxVisits: MAX_VISITS }, onProgress);
+    const batchResults = [];
+    let completedUrls = 0;
+    for (const batchUrl of batchUrls) {
+      const item = await automateWebsite(batchUrl, { ...safeOptions, batchUrls: undefined, visitCount, loopCount, maxBatchVisits: Math.min(maxBatchVisits, 20), trafficMode, maxVisits: MAX_VISITS }, progress => {
+        onProgress({ ...progress, completedUrls, totalUrls: batchUrls.length, currentUrl: batchUrl });
+      });
+      batchResults.push(item);
+      completedUrls += 1;
+      onProgress({ completed: completedUrls, remaining: batchUrls.length - completedUrls, failed: item.success ? 0 : 1, completedUrls, totalUrls: batchUrls.length, currentUrl: batchUrl });
+    }
+    const successes = batchResults.filter(item => item.success).length;
+    const result = batchResults.length === 1 ? batchResults[0] : {
+      success: successes > 0,
+      batch: true,
+      urls: batchUrls,
+      results: batchResults,
+      summary: { total: batchResults.length, successes, failures: batchResults.length - successes, sequential: true }
+    };
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     
     console.log(`${'='.repeat(50)}`);

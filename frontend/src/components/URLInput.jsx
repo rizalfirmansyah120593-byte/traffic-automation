@@ -27,7 +27,8 @@ function URLInput({ onSubmit }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    let processedUrl = url.trim();
+    const processedUrls = url.split(/[\n,]+/).map(item => item.trim()).filter(Boolean).slice(0, 3);
+    let processedUrl = processedUrls[0] || '';
     
     if (!processedUrl) {
       setError('Please enter a URL');
@@ -67,6 +68,7 @@ function URLInput({ onSubmit }) {
     setLoopError('');
     setBatchError('');
     onSubmit(processedUrl, { 
+      batchUrls: processedUrls,
       visitCount: parsedVisitCount, 
       loopCount: parsedLoopCount,
       maxBatchVisits: parsedBatch,
@@ -91,18 +93,20 @@ function URLInput({ onSubmit }) {
       <form onSubmit={handleSubmit} className="mb-4">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 min-w-[300px] relative">
-            <input
+            <textarea
               type="text"
               value={url}
+              rows="1"
               onChange={(e) => {
                 setUrl(e.target.value);
                 if (error) setError('');
               }}
-              placeholder={t('placeholder')}
+              placeholder={`${t('placeholder')} — max. 3 URL (satu per baris)`}
               className={`w-full px-6 py-4 rounded-xl bg-white/10 backdrop-blur-md border ${
                 error ? 'border-red-500' : 'border-white/20'
               } text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all`}
             />
+            <p className="text-gray-400 text-xs mt-2">Masukkan hingga 3 URL, satu URL per baris. Diproses berurutan untuk menjaga stabilitas RAM.</p>
             {error && (
               <p className="text-red-400 text-sm mt-2">{error}</p>
             )}
