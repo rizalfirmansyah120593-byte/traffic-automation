@@ -7,6 +7,20 @@ Platform otomasi browser berbasis React, Node.js, Express, dan Playwright untuk 
 <p align="center"><a href="https://saweria.co/RizalFirmansyah"><img src="https://img.shields.io/badge/☕%20Dukung%20Pengembangan-Saweria-ff5f7e?style=for-the-badge&logo=heart&logoColor=white" alt="Dukung melalui Saweria" /></a></p>
 <p align="center"><a href="https://saweria.co/RizalFirmansyah"><strong>💜 Dukung pengembangan project ini di Saweria</strong></a></p>
 
+<p align="center">
+  <a href="https://slategray-porcupine-986993.hostingersite.com" target="_blank">
+    <img src="https://img.shields.io/badge/🌐%20Coba%20Demo%20Live-Slategray%20Porcupine-06b6d4?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Coba demo live" />
+  </a>
+</p>
+
+## 🖥️ Live demo
+
+<p align="center">
+  <a href="https://slategray-porcupine-986993.hostingersite.com">https://slategray-porcupine-986993.hostingersite.com</a>
+</p>
+
+![Traffic Automation live demo](./images/demo-live.png)
+
 ## ✨ Fitur
 
 - Dashboard React dengan progress real-time melalui Server-Sent Events.
