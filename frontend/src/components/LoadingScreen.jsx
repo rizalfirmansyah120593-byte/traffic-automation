@@ -21,8 +21,8 @@ function LoadingScreen({ progress, onStop, url, options = {} }) {
   const formatTime = useMemo(() => `${String(Math.floor(elapsed / 60)).padStart(2, '0')}:${String(elapsed % 60).padStart(2, '0')}`, [elapsed]);
   const stats = [['Completed', completed, 'text-emerald-300', 'bg-emerald-400/10'], ['Remaining', remaining, 'text-amber-300', 'bg-amber-400/10'], ['Failed', failed, 'text-rose-300', 'bg-rose-400/10']];
 
-  return <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-xl">
-    <motion.div initial={{ y: 24, scale: .97 }} animate={{ y: 0, scale: 1 }} className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-white/15 bg-slate-900/95 p-6 text-white shadow-2xl shadow-purple-950/50 sm:p-8">
+  return <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="loading-overlay">
+    <motion.div initial={{ y: 24, scale: .97 }} animate={{ y: 0, scale: 1 }} className="loading-panel">
       <div className="absolute -right-24 -top-24 h-48 w-48 rounded-full bg-fuchsia-500/20 blur-3xl" />
       <div className="relative">
         <div className="mb-7 flex items-start justify-between"><div className="flex items-center gap-3"><div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 shadow-lg shadow-violet-500/30"><motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: 'linear' }} className="h-7 w-7 rounded-full border-2 border-white/30 border-t-white" /></div><div><p className="text-xs font-bold uppercase tracking-[.2em] text-violet-300">Live session</p><h2 className="text-2xl font-bold">Automation in progress</h2></div></div><div className="flex items-center gap-1.5 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-300"><span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" /> Active</div></div>
