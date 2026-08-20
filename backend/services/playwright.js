@@ -923,10 +923,10 @@ async function automateStealthTraffic(url, options = {}, onProgress = null) {
   
   try {
     const visitCount = Number.isInteger(options.visitCount) ? options.visitCount : 1;
-    // CRITICAL FIX: Limit batch size to 3 for Hugging Face Spaces to prevent memory issues
+    // Batch size is capped at 20 by the API; tune it according to available RAM.
     const maxBatchVisits = Math.min(
       Number.isInteger(options.maxBatchVisits) ? options.maxBatchVisits : 5,
-      3  // Max 3 concurrent visits for HF Spaces stability
+      20 // Maximum concurrent visits for the API
     );
     const captureScreenshots = visitCount === 1 ? true : Boolean(options.captureScreenshots);
 

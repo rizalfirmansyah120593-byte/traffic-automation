@@ -11,7 +11,7 @@ function URLInput({ onSubmit }) {
   const [visitCountError, setVisitCountError] = useState('');
   const [loopCount, setLoopCount] = useState('1');
   const [loopError, setLoopError] = useState('');
-  const [maxBatch, setMaxBatch] = useState('3');
+  const [maxBatch, setMaxBatch] = useState('20');
   const [batchError, setBatchError] = useState('');
   const [trafficMode, setTrafficMode] = useState('stealth');
   const MAX_VISITS = 1000;
