@@ -34,7 +34,9 @@ async function createWindow() {
   try { await waitForBackend('http://127.0.0.1:3006/api/health'); } catch (error) { dialog.showErrorBox('Startup failed', error.message); return; }
 
   const window = new BrowserWindow({ width: 1440, height: 900, minWidth: 1000, minHeight: 700, backgroundColor: '#070b18', webPreferences: { contextIsolation: true, nodeIntegration: false } });
-  if (isPackaged) await window.loadFile(path.join(root, 'frontend', 'dist', 'index.html'));
+  // Production Express serves frontend/dist and keeps /api requests on the
+  // same origin. This avoids broken absolute Vite assets under file://.
+  if (isPackaged) await window.loadURL('http://127.0.0.1:3006');
   else await window.loadURL('http://localhost:5176');
 }
 
