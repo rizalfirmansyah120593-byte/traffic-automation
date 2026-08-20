@@ -83,9 +83,9 @@ function URLInput({ onSubmit }) {
 
   const quickTests = [
     { url: 'example.com', label: 'Example' },
-    { url: 'wikipedia.org', label: 'Wikipedia' },
-    { url: 'github.com', label: 'GitHub' },
-    { url: 'news.ycombinator.com', label: 'Hacker News' }
+    { url: 'anistreaming.com', label: 'AniSteaming' },
+    { url: 'filmanesia.com', label: 'Filmanesia' },
+    { url: 'pornerweb.pro', label: 'Pornerweb' }
   ];
 
   return (

@@ -2,7 +2,7 @@
   "name": "web-traffic-lab-automation-platform",
   "version": "1.0.0",
   "description": "Web Traffic Lab Automation Platform: a live browser Traffic Automation project with a sample demo deployment on Render.",
-  "main": "backend/server.js",
+  "main": "electron/main.cjs",
   "repository": {
     "type": "git",
     "url": "https://github.com/SyntaxSouq/web-traffic-lab-automation-bot.git"
@@ -18,6 +18,8 @@
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "install:all": "npm install && cd frontend && npm install",
     "build:frontend": "cd frontend && npm install && npm run build",
+    "build:desktop": "npm run build:frontend && electron-builder --win nsis",
+    "dist": "npm run build:desktop",
     "build": "npm install && node scripts/install-playwright.js && cd frontend && npm install && npm run build",
     "prestart": "playwright install chromium",
     "start": "node backend/server.js",
@@ -45,6 +47,27 @@
     "ipaddr.js": "^2.3.0",
     "playwright": "^1.59.1",
     "playwright-extra": "^4.3.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2"
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "electron": "^31.7.7",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.trafficautomation.desktop",
+    "productName": "TrafficAutomation",
+    "asar": true,
+    "directories": { "output": "release" },
+    "files": [
+      "electron/**/*",
+      "backend/**/*",
+      "frontend/dist/**/*",
+      "scripts/**/*",
+      "package.json",
+      "node_modules/**/*"
+    ],
+    "extraResources": [
+      { "from": "node_modules/playwright-core/.local-browsers", "to": "playwright-browsers" }
+    ],
+    "win": { "target": [{ "target": "nsis", "arch": ["x64"] }], "artifactName": "TrafficAutomation Setup.exe" },
+    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true, "createDesktopShortcut": true, "createStartMenuShortcut": true }
   }
 }
