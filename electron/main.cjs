@@ -19,11 +19,13 @@ function waitForBackend(url, attempts = 40) {
 
 async function createWindow() {
   const isPackaged = app.isPackaged;
-  const root = isPackaged ? process.resourcesPath : path.join(__dirname, '..');
+  // In a packaged Electron app, backend/frontend are inside app.asar.
+  // Playwright browsers are unpacked into resources separately.
+  const root = isPackaged ? app.getAppPath() : path.join(__dirname, '..');
   const server = path.join(root, 'backend', 'server.js');
   const browserPath = isPackaged ? path.join(process.resourcesPath, 'playwright-browsers') : '0';
   backend = spawn(process.execPath, [server], {
-    cwd: root,
+    cwd: isPackaged ? process.resourcesPath : root,
     env: { ...process.env, ELECTRON_RUN_AS_NODE: '1', NODE_ENV: 'production', PORT: '3006', PLAYWRIGHT_BROWSERS_PATH: browserPath },
     windowsHide: true,
     stdio: 'ignore'

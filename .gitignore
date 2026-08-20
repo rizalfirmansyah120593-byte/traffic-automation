@@ -7,6 +7,26 @@ dist/
 frontend/dist/
 build/
 frontend/build/
+release/
+out/
+
+# Local browser binaries, caches, and Electron packaging
+node_modules/.cache/
+node_modules/playwright-core/.local-browsers/
+frontend/node_modules/.cache/
+.cache/
+dist-electron/
+*.blockmap
+*.nsis.7z
+*.exe
+*.dmg
+*.AppImage
+
+# Electron and Playwright caches
+.electron-cache/
+.electron-builder-cache/
+.local-browsers/
+**/.local-browsers/
 
 # Playwright
 playwright-report/
@@ -29,6 +49,18 @@ coverage/
 *.tmp
 *.temp
 
+# Python cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local runtime data
+*.pid
+*.seed
+*.bak
+*.orig
+*.pid.lock
+
 # OS/editor files
 .DS_Store
 Thumbs.db
@@ -37,3 +69,13 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
+
+# Local automation artifacts
+screenshots/
+downloads/
+traces/
+
+# Local application data and diagnostics
+debug.log
+uploads/
+sessions/
