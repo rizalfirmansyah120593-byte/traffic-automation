@@ -157,6 +157,23 @@ Search engine tidak memberikan link target yang dapat divalidasi. Ini berbeda da
 
 ## 🐳 Docker
 
+Pastikan Docker Desktop sudah berjalan, lalu dari folder project jalankan:
+
+```bash
+docker compose up --build
+```
+
+Buka `http://localhost:10000`. Server hanya dipublikasikan ke komputer lokal. Untuk menghentikan container, tekan `Ctrl+C`, lalu jalankan `docker compose down`.
+
+Untuk membatasi target pengujian, atur `ALLOWED_DOMAINS` sebelum menjalankan Compose (contoh PowerShell):
+
+```powershell
+$env:ALLOWED_DOMAINS = "staging.example.com,qa.example.org"
+docker compose up --build
+```
+
+Alternatif tanpa Compose:
+
 ```bash
 docker build -t traffic-automation .
 docker run --rm -p 10000:10000 -e NODE_ENV=production -e PORT=10000 -e MAX_ACTIVE_JOBS=1 traffic-automation

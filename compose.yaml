@@ -1,0 +1,14 @@
+services:
+  traffic-automation:
+    build: .
+    ports:
+      - "127.0.0.1:10000:10000"
+    environment:
+      NODE_ENV: production
+      PORT: 10000
+      MAX_ACTIVE_JOBS: ${MAX_ACTIVE_JOBS:-1}
+      AUTOMATE_RATE_LIMIT: ${AUTOMATE_RATE_LIMIT:-5}
+      MAX_VISITS: ${MAX_VISITS:-1000}
+      ALLOWED_DOMAINS: ${ALLOWED_DOMAINS:-}
+    shm_size: 1gb
+    init: true

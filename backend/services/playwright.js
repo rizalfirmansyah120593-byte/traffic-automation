@@ -12,9 +12,10 @@
  * 5. Concurrent Batch Processing
  */
 
-// Keep the browser inside this deployment's node_modules directory. Hostinger
-// may clear or change the shared ~/.cache path between build and runtime.
-process.env.PLAYWRIGHT_BROWSERS_PATH = '0';
+// Default to the app-local browser for hosting runtimes with ephemeral caches.
+if (!process.env.PLAYWRIGHT_BROWSERS_PATH) {
+  process.env.PLAYWRIGHT_BROWSERS_PATH = '0';
+}
 
 const { chromium } = require('./stealth');
 const fs = require('fs');

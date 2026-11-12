@@ -5,14 +5,14 @@ WORKDIR /app
 # Copy package files first for better caching
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install
+# Install production dependencies; Playwright's browser is installed below.
+RUN npm ci --omit=dev --ignore-scripts
 
 # Copy all project files
 COPY . .
 
-# Install Playwright browsers and dependencies
-RUN npx playwright install --with-deps chromium
+# Use the browser bundled with the matching Playwright base image.
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 
 # Build frontend
 WORKDIR /app/frontend
