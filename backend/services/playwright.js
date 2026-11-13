@@ -476,7 +476,7 @@ async function simulateSafeClicks(page, behavior) {
       await page.mouse.move(point.x, point.y, { steps: randomBetween(6, 20) });
       await randomDelay(150, 600);
       await page.mouse.click(point.x, point.y, { delay: clickDelay });
-      await randomDelay(250, 900);
+      await randomDelay(45000, 120000);
     }
   } catch (e) {
     console.log('⚠️ Safe click simulation skipped');
@@ -493,7 +493,7 @@ async function simulatePageInteractions(page, behavior) {
         const box = await randomLink.boundingBox();
         if (box) {
           await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-          await randomDelay(300, 800);
+          await randomDelay(45000, 120000);
           // Don't actually click, just hover (to stay on page)
         }
       }
@@ -705,17 +705,17 @@ async function runSingleVisit({ url, profile, browser, captureScreenshot, pageDw
       console.log(`   Navigating to: ${url}`);
       response = await page.goto(url, {
         waitUntil: 'domcontentloaded',
-        timeout: 30000
+        timeout: 300000
       });
       console.log(`   Page reached with status: ${response ? response.status() : 'No response'}`);
-      await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {
+      await page.waitForLoadState('networkidle', { timeout: 600000 }).catch(() => {
         console.log('   Wait for networkidle timed out (continuing anyway)');
       });
     } catch (error) {
       console.log(`   ⚠️ Initial navigation failed: ${error.message}. Retrying with longer timeout...`);
       response = await page.goto(url, {
         waitUntil: 'load',
-        timeout: 45000
+        timeout: 300000
       }).catch((e) => {
         console.log(`   ❌ Retry navigation failed: ${e.message}`);
         return null;
@@ -724,19 +724,19 @@ async function runSingleVisit({ url, profile, browser, captureScreenshot, pageDw
       if (!response) {
         throw new Error('Website failed to load. It may be blocking automated browsers or requires authentication. Try using Stealth mode or a different URL.');
       }
-      await page.waitForTimeout(5000);
+      await page.waitForTimeout(600000);
     }
 
     // Keep the target page open for the configured dwell time after it is ready.
     await page.waitForTimeout(pageDwellTime);
-    await randomDelay(900, 1900);
+    await randomDelay(300000, 190000);
     await simulateTabFocusBlur(page, profile.behavior);
     await simulateHumanMouse(page, profile.behavior);
-    await randomDelay(350, 1200);
+    await randomDelay(35000, 120000);
     await simulateHumanScroll(page, profile.behavior);
-    await randomDelay(300, 900);
+    await randomDelay(30000, 90000);
     await simulateSafeClicks(page, profile.behavior);
-    await randomDelay(300, 900);
+    await randomDelay(30000, 90000);
     await simulatePageInteractions(page, profile.behavior);
 
     const statusCode = response ? response.status() : 200;
@@ -897,7 +897,7 @@ async function automateWebsite(url, options = {}, onProgress = null) {
       console.log(`\n🧹 Cleaning up after loop ${l}...`);
       if (global.gc) global.gc();
       // Optional: Add a small delay between loops to be more "human"
-      await randomDelay(2000, 5000);
+      await randomDelay(2000, 600000);
     }
   }
 
@@ -1388,7 +1388,7 @@ async function runStormVisit({ url, userAgent, browser, captureScreenshot }) {
           timeout: 10000
         });
         // Wait for network idle to ensure JS and analytics scripts load
-        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
+        await page.waitForLoadState('networkidle', { timeout: 600000 }).catch(() => {});
       } catch (error) {
         // Fallback to load if domcontentloaded fails
         response = await page.goto(url, {
@@ -1539,7 +1539,7 @@ async function automateSearchEngineTraffic(url, options = {}, onProgress = null)
           profile,
           browser,
           captureScreenshot: captureScreenshots && i === 0,
-          pageDwellTime: Number(options.pageDwellTime) || 180000
+          pageDwellTime: Number(options.pageDwellTime) || 60000
         }).then(result => {
           completedCount++;
           if (result.success) {
@@ -1641,7 +1641,7 @@ async function automateSearchEngineTraffic(url, options = {}, onProgress = null)
 }
 
 // Single search engine visit - organic flow (Simplified & Improved)
-async function runSearchEngineVisit({ targetUrl, searchEngine, profile, browser, captureScreenshot, pageDwellTime = 180000 }) {
+async function runSearchEngineVisit({ targetUrl, searchEngine, profile, browser, captureScreenshot, pageDwellTime = 60000 }) {
   const visitStartTime = Date.now();
 
   const context = await browser.newContext({
@@ -1878,7 +1878,7 @@ async function runSearchEngineVisit({ targetUrl, searchEngine, profile, browser,
         throw new Error(`Could not find search input on ${searchEngine.name}`);
       }
       
-      await page.waitForTimeout(randomBetween(1000, 2000));
+      await page.waitForTimeout(randomBetween(300000, 600000)); // 5-6 seconds
 
       // Step 3: Press Enter
       console.log(`   ⏎ Pressing Enter...`);
@@ -1891,7 +1891,7 @@ async function runSearchEngineVisit({ targetUrl, searchEngine, profile, browser,
       // Step 5: Scroll to simulate human behavior
       console.log(`   📜 Scrolling through results...`);
       await page.mouse.wheel(0, 500);
-      await page.waitForTimeout(randomBetween(1000, 2000));
+      await page.waitForTimeout(randomBetween(300000, 600000)); // 5-6 seconds
 
       // Step 6: Find and click target link with EXACT DOMAIN MATCHING
       console.log(`   🔍 Finding EXACT target link: ${baseDomain}...`);
@@ -2021,15 +2021,15 @@ async function runSearchEngineVisit({ targetUrl, searchEngine, profile, browser,
       // Mengatur dwell time menjadi 10 menit (600.000 milidetik)
       const pageDwellTime = 600000;
       // Wait for navigation to target website
-      await page.waitForLoadState('domcontentloaded', { timeout: 15000 });
+      await page.waitForLoadState('domcontentloaded', { timeout: 600000 });
       await page.waitForTimeout(pageDwellTime);
 
       // Step 7: Simulate browsing on target website
       await simulateTabFocusBlur(page, profile.behavior);
       await simulateHumanMouse(page, profile.behavior);
-      await randomDelay(350, 1200);
+      await randomDelay(300000, 1200000); // 5-20 seconds
       await simulateHumanScroll(page, profile.behavior);
-      await randomDelay(300, 900);
+      await randomDelay(300000, 1200000); // 5-20 seconds
       await simulateSafeClicks(page, profile.behavior);
 
       // Capture data
