@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import URLInput from './components/URLInput';
 import ResultCard from './components/ResultCard';
+import SeoAuditResult from './components/SeoAuditResult';
 import CancelledResult from './components/CancelledResult';
 import HistoryList from './components/HistoryList';
 import IPDisplay from './components/IPDisplay';
@@ -30,6 +31,7 @@ function App() {
   const [lastAutomationState, setLastAutomationState] = useState(null);
 
   const handleAutomate = async (url, options = {}) => {
+    const isSeoAudit = options.trafficMode === 'seo';
     setLoading(true);
     setResult(null);
     setProgress(null);
@@ -38,8 +40,8 @@ function App() {
     const controller = new AbortController();
     setAbortController(controller);
     
-    const urlCount = Array.isArray(options.batchUrls) && options.batchUrls.length ? options.batchUrls.length : 1;
-    const totalVisits = (options.visitCount || 1) * (options.loopCount || 1) * urlCount;
+    const urlCount = isSeoAudit ? 1 : Array.isArray(options.batchUrls) && options.batchUrls.length ? options.batchUrls.length : 1;
+    const totalVisits = isSeoAudit ? 1 : (options.visitCount || 1) * (options.loopCount || 1) * urlCount;
     progressRef.current = { 
       completed: 0, 
       remaining: totalVisits, 
@@ -49,17 +51,27 @@ function App() {
       totalUrls: urlCount,
       options
     };
-    setProgress(progressRef.current);
+    if (!isSeoAudit) setProgress(progressRef.current);
     
     try {
-      const apiUrl = '/api/automate';
+      const apiUrl = isSeoAudit ? '/api/seo-audit' : '/api/automate';
         
       const res = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, options }),
+        body: JSON.stringify(isSeoAudit ? { url } : { url, options }),
         signal: controller.signal
       });
+
+      if (isSeoAudit) {
+        const auditData = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          setResult({ type: 'seoAudit', success: false, url, error: auditData.error || 'SEO audit request failed.' });
+          return;
+        }
+        setResult(auditData);
+        return;
+      }
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
@@ -124,6 +136,10 @@ function App() {
     } catch (error) {
       console.error('Automation error:', error);
       if (error.name === 'AbortError') {
+        if (isSeoAudit) {
+          setResult({ type: 'seoAudit', success: false, url, error: 'Audit SEO dibatalkan.' });
+          return;
+        }
         const currentProgress = progressRef.current || { completed: 0, remaining: options.visitCount || 1, failed: 0 };
         
         // Save the state for potential resume
@@ -143,7 +159,9 @@ function App() {
           progress: currentProgress
         });
       } else {
-        setResult({ success: false, error: error.message || 'Connection failed. The server might be restarting.' });
+        setResult(isSeoAudit
+          ? { type: 'seoAudit', success: false, url, error: error.message || 'SEO audit request failed.' }
+          : { success: false, error: error.message || 'Connection failed. The server might be restarting.' });
       }
     } finally {
       setLoading(false);
@@ -193,17 +211,26 @@ function App() {
             </span>
           </h1>
           <p className="text-slate-400 text-center text-lg mb-12 tracking-wide">
-            Advanced browser automation with anti-detection
+            Browser automation and passive SEO checks
           </p>
         </motion.div>
         
         <URLInput onSubmit={handleAutomate} />
         <div className="mb-8 flex justify-center"><AdSlot type="native" /></div>
         
-        {loading && <LoadingScreen progress={progress} onStop={handleStop} url={currentUrl} options={progressRef.current?.options} />}
+        {loading && progressRef.current?.options?.trafficMode === 'seo' ? (
+          <div className="mb-8 rounded-xl border border-cyan-400/20 bg-cyan-400/5 p-5 text-center text-cyan-100">
+            {language === 'id'
+              ? 'Memeriksa halaman, robots.txt, sitemap, dan canonical secara pasif…'
+              : 'Checking the page, robots.txt, sitemap, and canonical signals…'}
+            <button type="button" onClick={handleStop} className="ml-4 text-sm underline">{language === 'id' ? 'Batalkan' : 'Cancel'}</button>
+          </div>
+        ) : loading && <LoadingScreen progress={progress} onStop={handleStop} url={currentUrl} options={progressRef.current?.options} />}
         
         {result && result.cancelled && <CancelledResult data={result} onResume={handleResume} />}
-        {result && !result.cancelled && <ResultCard data={result} />}
+        {result && !result.cancelled && (result.type === 'seoAudit'
+          ? <SeoAuditResult data={result} />
+          : <ResultCard data={result} />)}
 
         <div className="my-8 hidden justify-center md:flex"><AdSlot type="desktop" /></div>
         <div className="my-6 flex justify-center md:hidden"><AdSlot type="mobile" /></div>

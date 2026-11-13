@@ -1,10 +1,15 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FaRocket, FaBolt, FaChevronDown } from 'react-icons/fa';
+import { FaRocket, FaChevronDown } from 'react-icons/fa';
 import { useLanguage } from '../i18n';
 
 function URLInput({ onSubmit }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const seoAuditLabel = language === 'id' ? 'Mulai Audit SEO' : 'Start SEO Audit';
+  const seoHint = language === 'id'
+    ? 'Audit SEO pasif; hanya satu URL dan tidak mengirim klik ke mesin pencari.'
+    : 'Passive SEO audit; one URL only, with no search-engine clicks.';
+  const seoUrlError = language === 'id' ? 'SEO audit hanya memproses satu URL setiap kali' : 'SEO audit accepts one URL at a time';
   const [url, setUrl] = useState('');
   const [error, setError] = useState('');
   const [visitCount, setVisitCount] = useState('1');
@@ -13,7 +18,8 @@ function URLInput({ onSubmit }) {
   const [loopError, setLoopError] = useState('');
   const [maxBatch, setMaxBatch] = useState('20');
   const [batchError, setBatchError] = useState('');
-  const [trafficMode, setTrafficMode] = useState('stealth');
+  const [trafficMode, setTrafficMode] = useState('seo');
+  const isSeoAudit = trafficMode === 'seo';
   const MAX_VISITS = 1000;
 
   const validateUrl = (input) => {
@@ -28,8 +34,8 @@ function URLInput({ onSubmit }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     const rawUrls = url.split(/[\n,]+/).map(item => item.trim()).filter(Boolean);
-    if (rawUrls.length > 3) {
-      setError('Maksimal 3 URL yang dapat diproses sekaligus');
+    if (rawUrls.length > 3 || (isSeoAudit && rawUrls.length > 1)) {
+      setError(isSeoAudit ? seoUrlError : 'Maksimal 3 URL yang dapat diproses sekaligus');
       return;
     }
     const processedUrls = rawUrls.map(item => /^https?:\/\//i.test(item) ? item : `https://${item}`);
@@ -41,20 +47,20 @@ function URLInput({ onSubmit }) {
     }
 
     const parsedVisitCount = Number(visitCount);
-    if (!Number.isInteger(parsedVisitCount) || parsedVisitCount < 1 || parsedVisitCount > MAX_VISITS) {
+    if (!isSeoAudit && (!Number.isInteger(parsedVisitCount) || parsedVisitCount < 1 || parsedVisitCount > MAX_VISITS)) {
       setVisitCountError(`Visit count must be an integer between 1 and ${MAX_VISITS}`);
       return;
     }
 
     const parsedLoopCount = Number(loopCount);
-    if (!Number.isInteger(parsedLoopCount) || parsedLoopCount < 1 || parsedLoopCount > 100) {
+    if (!isSeoAudit && (!Number.isInteger(parsedLoopCount) || parsedLoopCount < 1 || parsedLoopCount > 100)) {
       setLoopError(`Loops must be between 1 and 100`);
       return;
     }
 
     const maxBatchLimit = 20; // FIXED: Consistent limit of 20
     const parsedBatch = Number(maxBatch);
-    if (!Number.isInteger(parsedBatch) || parsedBatch < 1 || parsedBatch > maxBatchLimit) {
+    if (!isSeoAudit && (!Number.isInteger(parsedBatch) || parsedBatch < 1 || parsedBatch > maxBatchLimit)) {
       setBatchError(`Batch size must be between 1 and ${maxBatchLimit}`);
       return;
     }
@@ -73,20 +79,13 @@ function URLInput({ onSubmit }) {
     setLoopError('');
     setBatchError('');
     onSubmit(processedUrl, { 
-      batchUrls: processedUrls,
-      visitCount: parsedVisitCount, 
-      loopCount: parsedLoopCount,
-      maxBatchVisits: parsedBatch,
+      batchUrls: isSeoAudit ? [processedUrl] : processedUrls,
+      visitCount: isSeoAudit ? 1 : parsedVisitCount,
+      loopCount: isSeoAudit ? 1 : parsedLoopCount,
+      maxBatchVisits: isSeoAudit ? 1 : parsedBatch,
       trafficMode: trafficMode
     });
   };
-
-  const quickTests = [
-    { url: 'example.com', label: 'Example' },
-    { url: 'anistreaming.com', label: 'AniSteaming' },
-    { url: 'filmanesia.com', label: 'Filmanesia' },
-    { url: 'pornerweb.pro', label: 'Pornerweb' }
-  ];
 
   return (
     <motion.div
@@ -106,17 +105,17 @@ function URLInput({ onSubmit }) {
                 setUrl(e.target.value);
                 if (error) setError('');
               }}
-              placeholder={`${t('placeholder')} — max. 3 URL (satu per baris)`}
+              placeholder={isSeoAudit ? t('placeholder') : `${t('placeholder')} — max. 3 URL (satu per baris)`}
               className={`w-full px-6 py-4 rounded-xl bg-white/10 backdrop-blur-md border ${
                 error ? 'border-red-500' : 'border-white/20'
               } text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all`}
             />
-            <p className="text-gray-400 text-xs mt-2">Masukkan hingga 3 URL, satu URL per baris. Diproses berurutan untuk menjaga stabilitas RAM.</p>
+            <p className="text-gray-400 text-xs mt-2">{isSeoAudit ? seoHint : 'Masukkan hingga 3 URL, satu URL per baris. Diproses berurutan untuk menjaga stabilitas RAM.'}</p>
             {error && (
               <p className="text-red-400 text-sm mt-2">{error}</p>
             )}
           </div>
-          <div className="md:w-36 relative">
+          {!isSeoAudit && <div className="md:w-36 relative">
             <input
               type="number"
               min="1"
@@ -136,8 +135,8 @@ function URLInput({ onSubmit }) {
             {visitCountError && (
               <p className="text-red-400 text-sm mt-2">{visitCountError}</p>
             )}
-          </div>
-          <div className="md:w-32 relative">
+          </div>}
+          {!isSeoAudit && <div className="md:w-32 relative">
             <input
               type="number"
               min="1"
@@ -157,7 +156,7 @@ function URLInput({ onSubmit }) {
             {loopError && (
               <p className="text-red-400 text-sm mt-2">{loopError}</p>
             )}
-          </div>
+          </div>}
           <div className="md:w-56 relative group">
             <select
               value={trafficMode}
@@ -170,14 +169,14 @@ function URLInput({ onSubmit }) {
             >
               <option value="stealth" className="bg-gray-800">🛡️ Stealth Anti-Bot</option>
               <option value="storm" className="bg-gray-800">⚡ Storm Traffic</option>
-              <option value="search" className="bg-gray-800">🔍 Search Engine</option>
+              <option value="seo" className="bg-gray-800">🔍 SEO Audit (pasif)</option>
             </select>
             <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 group-hover:text-white transition-colors">
               <FaChevronDown size={14} />
             </div>
             <p className="text-gray-400 text-xs mt-2">{t('trafficMode')}</p>
           </div>
-          <div className="md:w-36 relative">
+          {!isSeoAudit && <div className="md:w-36 relative">
             <input
               type="number"
               min="1"
@@ -197,7 +196,7 @@ function URLInput({ onSubmit }) {
             {batchError && (
               <p className="text-red-400 text-sm mt-2">{batchError}</p>
             )}
-          </div>
+          </div>}
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -205,31 +204,14 @@ function URLInput({ onSubmit }) {
             className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold hover:shadow-2xl hover:shadow-purple-500/50 transition-all flex items-center justify-center gap-2"
           >
             <FaRocket />
-            <span>{t('automate')}</span>
+            <span>{isSeoAudit ? seoAuditLabel : t('automate')}</span>
           </motion.button>
         </div>
       </form>
       
-      <div className="flex items-center gap-2 flex-wrap justify-center">
-        <FaBolt className="text-yellow-400" />
-        <span className="text-gray-400 text-sm">Quick tests:</span>
-        {quickTests.map((test, idx) => (
-          <button
-            key={idx}
-            onClick={() => {
-              setUrl(test.url);
-              setError('');
-            }}
-            className="px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm text-gray-300 hover:text-white transition-all"
-          >
-            {test.label}
-          </button>
-        ))}
-      </div>
-      
       <div className="mt-4 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl">
         <p className="text-sm text-blue-300 mb-2">
-          <strong>🎯 Active Mode: {trafficMode === 'stealth' ? '🛡️ Stealth Anti-Bot' : trafficMode === 'storm' ? '⚡ Storm Traffic' : '🔍 Search Engine'}</strong>
+          <strong>🎯 Active Mode: {trafficMode === 'stealth' ? '🛡️ Stealth Anti-Bot' : trafficMode === 'storm' ? '⚡ Storm Traffic' : '🔍 SEO Audit'}</strong>
         </p>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs text-gray-300">
           {trafficMode === 'stealth' && (
@@ -260,18 +242,15 @@ function URLInput({ onSubmit }) {
               <div>⚠️ Higher Detection Risk</div>
             </>
           )}
-          {trafficMode === 'search' && (
+          {isSeoAudit && (
             <>
-              <div>🔍 Google Search</div>
-              <div>🔍 Bing Search</div>
-              <div>🔍 DuckDuckGo</div>
-              <div>✓ Organic Traffic</div>
-              <div>✓ Human Behavior</div>
-              <div>✓ Search & Click</div>
-              <div>✓ Result Scanning</div>
-              <div>✓ Anti-Detection</div>
-              <div>✓ Fingerprint Masking</div>
-              <div>✓ Realistic Flow</div>
+              <div>✓ Indeksasi: cek sinyal noindex</div>
+              <div>✓ robots.txt</div>
+              <div>✓ Sitemap</div>
+              <div>✓ Canonical</div>
+              <div>✓ Status HTTP &amp; meta</div>
+              <div>✓ Tanpa query mesin pencari</div>
+              <div>✓ Tanpa klik atau kunjungan berulang</div>
             </>
           )}
         </div>

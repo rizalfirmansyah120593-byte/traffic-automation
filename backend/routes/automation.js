@@ -12,6 +12,7 @@ const router = express.Router();
 const dns = require('dns').promises;
 const ipaddr = require('ipaddr.js');
 const { automateWebsite } = require('../services/playwright');
+const { auditSite } = require('../services/seoAudit');
 
 // Process-wide safety guards. Configure these with environment variables in production.
 const activeJobs = new Set();
@@ -52,29 +53,21 @@ function rateLimited(key) {
 async function isSafeUrl(urlStr) {
   try {
     const url = new URL(urlStr);
-    const hostname = url.hostname;
+    const hostname = url.hostname.replace(/^\[|\]$/g, '');
     
     // 1. Basic string check for obvious local addresses
     const blockedStrings = ['localhost', '0.0.0.0', '::1'];
     if (blockedStrings.some(b => hostname.includes(b))) return false;
 
-    // 2. DNS Resolution to catch hidden local/private IPs
-    const addresses = await dns.resolve(hostname).catch(async () => {
-      // Fallback to lookup for some environments
-      const { address } = await dns.lookup(hostname);
-      return [address];
+    // Check every A/AAAA result so a mixed public/private DNS response is rejected.
+    const addresses = ipaddr.isValid(hostname)
+      ? [{ address: hostname }]
+      : await dns.lookup(hostname, { all: true, verbatim: true });
+    return addresses.length > 0 && addresses.every(({ address }) => {
+      if (!ipaddr.isValid(address)) return false;
+      const range = ipaddr.parse(address).range();
+      return range === 'unicast' || range === 'public';
     });
-
-    for (const addr of addresses) {
-      if (ipaddr.isValid(addr)) {
-        const ip = ipaddr.parse(addr);
-        const range = ip.range();
-        if (range !== 'unicast' && range !== 'public') {
-          return false; // Block private, loopback, link-local, etc.
-        }
-      }
-    }
-    return true;
   } catch (error) {
     return false;
   }
@@ -165,11 +158,11 @@ router.post('/automate', async (req, res) => {
 
   // Validate traffic mode
   const trafficMode = safeOptions.trafficMode || 'stealth';
-  const validModes = ['stealth', 'storm', 'search'];
+  const validModes = ['stealth', 'storm'];
   if (!validModes.includes(trafficMode)) {
     return res.status(400).json({
       success: false,
-      error: 'Invalid traffic mode. Must be: stealth, storm, or search'
+      error: 'Invalid traffic mode. Must be: stealth or storm'
     });
   }
 
@@ -275,6 +268,42 @@ router.post('/automate', async (req, res) => {
     }
   } finally {
     activeJobs.delete(jobId);
+  }
+});
+
+router.post('/seo-audit', async (req, res) => {
+  const requester = clientKey(req);
+  if (rateLimited(requester)) {
+    return res.status(429).json({ success: false, error: 'Too many audit requests. Try again later.' });
+  }
+
+  if (typeof req.body?.url !== 'string' || !req.body.url.trim()) {
+    return res.status(400).json({ success: false, error: 'A URL is required.' });
+  }
+
+  let normalizedUrl = req.body.url.trim();
+  if (!/^https?:\/\//i.test(normalizedUrl)) normalizedUrl = `https://${normalizedUrl}`;
+  if (!isValidUrl(normalizedUrl)) {
+    return res.status(400).json({ success: false, error: 'Invalid URL format.' });
+  }
+
+  const targetUrl = new URL(normalizedUrl);
+  if (!['http:', 'https:'].includes(targetUrl.protocol) || targetUrl.username || targetUrl.password) {
+    return res.status(400).json({ success: false, error: 'Only public HTTP(S) URLs without credentials can be audited.' });
+  }
+  if (!allowedDomain(targetUrl.hostname)) {
+    return res.status(403).json({ success: false, error: 'This target domain is not in the configured audit allowlist.' });
+  }
+  if (!(await isSafeUrl(normalizedUrl))) {
+    return res.status(400).json({ success: false, error: 'The target must resolve only to public IP addresses.' });
+  }
+
+  try {
+    const report = await auditSite(normalizedUrl, { allowedDomain, isSafeUrl });
+    return res.json(report);
+  } catch (error) {
+    console.error(`[SEO audit] target=${targetUrl.hostname} error=${error.message}`);
+    return res.status(502).json({ success: false, error: error.message || 'SEO audit request failed.' });
   }
 });
 

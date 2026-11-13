@@ -40,7 +40,8 @@ if (process.env.NODE_ENV === 'production') {
         version: '1.0.0',
         endpoints: {
           health: 'GET /api/health',
-          automate: 'POST /api/automate'
+          automate: 'POST /api/automate',
+          seoAudit: 'POST /api/seo-audit'
         },
         note: 'Frontend needs to be built: cd frontend && npm run build'
       });

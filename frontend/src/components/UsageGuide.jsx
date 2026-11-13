@@ -9,14 +9,52 @@ const content = {
   de: { title: 'Bedienungsanleitung', intro: 'Verwenden Sie dieses Tool nur für eigene oder autorisierte Websites.', start: 'Erste Schritte', steps: ['Geben Sie eine öffentliche HTTPS-URL ein.', 'Wählen Sie den passenden Modus.', 'Beginnen Sie mit 1 Besuch und einem kleinen Stapel.', 'Überwachen Sie Fortschritt und Fehler in Echtzeit.'], modes: [['🛡️ Stealth-Modus', 'Browser-Kompatibilität mit umfangreicheren Interaktionen.', ['Navigation und JavaScript aktiv', 'Scroll-, Maus- und Fokus-Simulation', 'Geeignet für QA und Analytics']], ['⚡ Storm-Modus', 'Begrenzte Lasttests für eigene Systeme.', ['Geschwindigkeit im Vordergrund', 'Mehr Parallelität benötigt mehr RAM', 'Nur Staging oder geplante Tests']], ['🔍 Search-Engine-Modus', 'Prüft Suchergebnisse für eine indexierte Domain.', ['Google, Bing oder DuckDuckGo', 'Domain-Link wird validiert', 'Kann bei CAPTCHA fehlschlagen']]], tips: 'Bewährte Methoden', tipsList: ['Mit 1–3 Besuchen starten.', 'Lokal Stapelgröße 1–3 verwenden.', 'DNS und öffentliche Domain prüfen.', 'Keinen Traffic, Anzeigen oder Analytics Dritter manipulieren.'], troubleshooting: 'Fehlerbehebung', problems: [['Suche schlägt fehl', 'Domain manuell prüfen und Logs ansehen.'], ['Browser startet nicht', 'Playwright Chromium installieren und RAM prüfen.'], ['Falscher Analytics-Standort', 'GA4 nutzt hauptsächlich die öffentliche IP, nicht die Zeitzone.']] }
 };
 
+const seoAuditContent = {
+  id: ['🔍 Audit SEO pasif', 'Memeriksa sinyal teknis tanpa membuka mesin pencari atau mengirim klik.', ['Status HTTP dan title/description', 'Canonical serta robots meta dan X-Robots-Tag', 'robots.txt dan sitemap', 'Indikasi teknis bukan konfirmasi indeksasi']],
+  en: ['🔍 Passive SEO audit', 'Checks technical signals without opening a search engine or sending clicks.', ['HTTP status and title/description', 'Canonical, robots meta, and X-Robots-Tag', 'robots.txt and sitemap', 'Technical signals do not confirm indexation']],
+  es: ['🔍 Auditoría SEO pasiva', 'Comprueba señales técnicas sin abrir buscadores ni enviar clics.', ['Estado HTTP y title/description', 'Canonical, robots meta y X-Robots-Tag', 'robots.txt y sitemap', 'Las señales no confirman la indexación']],
+  fr: ['🔍 Audit SEO passif', 'Vérifie les signaux techniques sans ouvrir de moteur de recherche ni envoyer de clics.', ['Statut HTTP et title/description', 'Canonical, robots meta et X-Robots-Tag', 'robots.txt et sitemap', 'Les signaux ne confirment pas l’indexation']],
+  de: ['🔍 Passives SEO-Audit', 'Prüft technische Signale ohne Suchmaschine oder Klicks.', ['HTTP-Status und Title/Description', 'Canonical, Robots-Meta und X-Robots-Tag', 'robots.txt und Sitemap', 'Signale bestätigen keine Indexierung']]
+};
+
+const seoGuide = {
+  id: {
+    steps: ['Masukkan satu URL yang tercakup dalam allowlist.', 'Pilih Audit SEO pasif dan mulai audit.', 'Tinjau status HTTP, robots, sitemap, canonical, dan noindex.', 'Verifikasi indeksasi aktual melalui Search Console atau Bing Webmaster Tools.'],
+    tips: ['Audit hanya membaca halaman dan file SEO; tidak mengirim query atau klik.', 'Gunakan domain yang Anda miliki atau berwenang uji.', 'Sinyal teknis bukan bukti bahwa halaman sudah terindeks.', 'Pastikan domain tercakup dalam ALLOWED_DOMAINS.'],
+    problems: [['Domain ditolak', 'Tambahkan domain yang berwenang diuji ke ALLOWED_DOMAINS.'], ['Indeksasi tidak diketahui', 'Periksa status aktual di Search Console atau Bing Webmaster Tools.'], ['robots.txt atau sitemap gagal dibaca', 'Pastikan URL file publik, respons HTTP tersedia, dan domain diizinkan.']]
+  },
+  en: {
+    steps: ['Enter one URL covered by the allowlist.', 'Select Passive SEO Audit and start.', 'Review HTTP, robots, sitemap, canonical, and noindex signals.', 'Verify actual indexation in Search Console or Bing Webmaster Tools.'],
+    tips: ['The audit reads pages and SEO files only; it sends no search queries or clicks.', 'Use a domain you own or are authorized to test.', 'Technical signals do not prove that a page is indexed.', 'Ensure the domain is included in ALLOWED_DOMAINS.'],
+    problems: [['Domain rejected', 'Add an authorized domain to ALLOWED_DOMAINS.'], ['Indexation is unknown', 'Check the actual status in Search Console or Bing Webmaster Tools.'], ['robots.txt or sitemap could not be read', 'Check public access, HTTP response, and the domain allowlist.']]
+  },
+  es: {
+    steps: ['Introduce una URL incluida en la lista permitida.', 'Elige Auditoría SEO pasiva e inicia.', 'Revisa HTTP, robots, sitemap, canonical y noindex.', 'Verifica la indexación real en Search Console o Bing Webmaster Tools.'],
+    tips: ['La auditoría solo lee páginas y archivos SEO; no envía búsquedas ni clics.', 'Usa un dominio propio o autorizado.', 'Las señales técnicas no prueban la indexación.', 'Incluye el dominio en ALLOWED_DOMAINS.'],
+    problems: [['Dominio rechazado', 'Añade un dominio autorizado a ALLOWED_DOMAINS.'], ['Indexación desconocida', 'Comprueba el estado en Search Console o Bing Webmaster Tools.'], ['No se pudo leer robots.txt o sitemap', 'Comprueba el acceso público, HTTP y la lista permitida.']]
+  },
+  fr: {
+    steps: ['Saisissez une URL autorisée.', 'Choisissez Audit SEO passif et démarrez.', 'Vérifiez HTTP, robots, sitemap, canonical et noindex.', 'Confirmez l’indexation dans Search Console ou Bing Webmaster Tools.'],
+    tips: ['L’audit lit uniquement la page et ses fichiers SEO; aucun clic ni requête de recherche.', 'Utilisez un domaine autorisé.', 'Les signaux techniques ne prouvent pas l’indexation.', 'Ajoutez le domaine à ALLOWED_DOMAINS.'],
+    problems: [['Domaine refusé', 'Ajoutez un domaine autorisé à ALLOWED_DOMAINS.'], ['Indexation inconnue', 'Vérifiez son statut dans Search Console ou Bing Webmaster Tools.'], ['robots.txt ou sitemap inaccessible', 'Vérifiez l’accès public, HTTP et la liste autorisée.']]
+  },
+  de: {
+    steps: ['Geben Sie eine freigegebene URL ein.', 'Wählen Sie passives SEO-Audit und starten Sie.', 'Prüfen Sie HTTP, robots, Sitemap, Canonical und Noindex.', 'Bestätigen Sie die Indexierung in Search Console oder Bing Webmaster Tools.'],
+    tips: ['Das Audit liest nur Seite und SEO-Dateien; es sendet keine Suchanfragen oder Klicks.', 'Verwenden Sie eine eigene oder autorisierte Domain.', 'Technische Signale beweisen keine Indexierung.', 'Nehmen Sie die Domain in ALLOWED_DOMAINS auf.'],
+    problems: [['Domain abgelehnt', 'Fügen Sie eine autorisierte Domain zu ALLOWED_DOMAINS hinzu.'], ['Indexierung unbekannt', 'Prüfen Sie den Status in Search Console oder Bing Webmaster Tools.'], ['robots.txt oder Sitemap nicht lesbar', 'Prüfen Sie öffentlichen Zugriff, HTTP-Status und Allowlist.']]
+  }
+};
+
 export default function UsageGuide() {
   const { language } = useLanguage();
   const c = content[language] || content.en;
+  const seo = seoAuditContent[language] || seoAuditContent.en;
+  const guide = seoGuide[language] || seoGuide.en;
   return <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-16 mb-8 rounded-3xl border border-white/10 bg-slate-900/60 p-6 shadow-2xl backdrop-blur-md sm:p-8">
     <h2 className="mb-3 text-center text-3xl font-bold text-transparent bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text">📖 {c.title}</h2>
     <p className="mx-auto mb-8 max-w-3xl text-center text-sm text-slate-300">{c.intro}</p>
-    <div className="mb-8 rounded-2xl border border-violet-400/20 bg-violet-500/10 p-5"><h3 className="mb-3 text-xl font-semibold text-violet-200">🚀 {c.start}</h3><ol className="grid gap-3 text-sm text-slate-300 md:grid-cols-2">{c.steps.map((x, i) => <li key={x} className="flex gap-3"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-violet-500/30 text-xs font-bold text-violet-200">{i + 1}</span>{x}</li>)}</ol></div>
-    <div className="grid gap-5 lg:grid-cols-3">{c.modes.map(([title, desc, list], i) => <article key={title} className={`rounded-2xl border p-5 ${['border-indigo-500/40 bg-indigo-950/40', 'border-orange-500/40 bg-orange-950/40', 'border-cyan-500/40 bg-cyan-950/40'][i]}`}><h3 className="mb-2 text-lg font-semibold text-white">{title}</h3><p className="mb-4 text-sm text-slate-300">{desc}</p><ul className="space-y-2 text-sm text-slate-300">{list.map(x => <li key={x}>✓ {x}</li>)}</ul></article>)}</div>
-    <div className="mt-5 grid gap-5 md:grid-cols-2"><article className="rounded-2xl border border-emerald-500/30 bg-emerald-950/30 p-5"><h3 className="mb-3 text-lg font-semibold text-emerald-200">💡 {c.tips}</h3><ul className="space-y-2 text-sm text-slate-300">{c.tipsList.map(x => <li key={x}>• {x}</li>)}</ul></article><article className="rounded-2xl border border-amber-500/30 bg-amber-950/30 p-5"><h3 className="mb-3 text-lg font-semibold text-amber-200">🔧 {c.troubleshooting}</h3><div className="space-y-3 text-sm text-slate-300">{c.problems.map(([q, a]) => <div key={q}><strong className="text-amber-100">{q}</strong><p>{a}</p></div>)}</div></article></div>
+    <div className="mb-8 rounded-2xl border border-violet-400/20 bg-violet-500/10 p-5"><h3 className="mb-3 text-xl font-semibold text-violet-200">🚀 {c.start}</h3><ol className="grid gap-3 text-sm text-slate-300 md:grid-cols-2">{guide.steps.map((x, i) => <li key={x} className="flex gap-3"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-violet-500/30 text-xs font-bold text-violet-200">{i + 1}</span>{x}</li>)}</ol></div>
+    <div className="grid gap-5 lg:grid-cols-3">{c.modes.slice(0, 2).map(([title, desc, list], i) => <article key={title} className={`rounded-2xl border p-5 ${['border-indigo-500/40 bg-indigo-950/40', 'border-orange-500/40 bg-orange-950/40'][i]}`}><h3 className="mb-2 text-lg font-semibold text-white">{title}</h3><p className="mb-4 text-sm text-slate-300">{desc}</p><ul className="space-y-2 text-sm text-slate-300">{list.map(x => <li key={x}>✓ {x}</li>)}</ul></article>)}<article className="rounded-2xl border border-cyan-500/40 bg-cyan-950/40 p-5"><h3 className="mb-2 text-lg font-semibold text-white">{seo[0]}</h3><p className="mb-4 text-sm text-slate-300">{seo[1]}</p><ul className="space-y-2 text-sm text-slate-300">{seo[2].map(x => <li key={x}>✓ {x}</li>)}</ul></article></div>
+    <div className="mt-5 grid gap-5 md:grid-cols-2"><article className="rounded-2xl border border-emerald-500/30 bg-emerald-950/30 p-5"><h3 className="mb-3 text-lg font-semibold text-emerald-200">💡 {c.tips}</h3><ul className="space-y-2 text-sm text-slate-300">{guide.tips.map(x => <li key={x}>• {x}</li>)}</ul></article><article className="rounded-2xl border border-amber-500/30 bg-amber-950/30 p-5"><h3 className="mb-3 text-lg font-semibold text-amber-200">🔧 {c.troubleshooting}</h3><div className="space-y-3 text-sm text-slate-300">{guide.problems.map(([q, a]) => <div key={q}><strong className="text-amber-100">{q}</strong><p>{a}</p></div>)}</div></article></div>
   </motion.section>;
 }

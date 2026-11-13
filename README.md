@@ -25,7 +25,7 @@ Platform otomasi browser berbasis React, Node.js, Express, dan Playwright untuk 
 
 - Dashboard React dengan progress real-time melalui Server-Sent Events.
 - Playwright Chromium untuk pengujian navigasi, JavaScript, performa, screenshot, dan analytics.
-- Mode Stealth, Storm, dan Search Engine.
+- Mode Stealth, Storm, dan audit SEO pasif.
 - Device, viewport, timezone, locale, geolocation, dan user agent configuration.
 - Hingga 3 URL yang diproses sequential agar penggunaan RAM stabil.
 - Progress, hasil, error, audit log, console log, dan screenshot.
@@ -91,11 +91,11 @@ Pengujian kompatibilitas browser dan interaksi halaman pada website yang diizink
 
 Load test terbatas pada server milik sendiri. Mulai dari batch kecil dan pantau CPU, RAM, response time, serta error rate.
 
-### Search Engine
+### Audit SEO
 
-Memeriksa alur hasil pencarian untuk domain yang sudah terindeks. Mode dapat gagal jika domain belum diindeks, terkena CAPTCHA, diblokir regional, atau link target tidak tampil.
+Audit pasif memeriksa status HTTP, title, meta description, canonical, robots meta/X-Robots-Tag, `robots.txt`, dan sitemap. Audit tidak mengirim query atau klik ke Google/Bing dan tidak membuat kunjungan berulang.
 
-Mode ini tidak dapat memaksa Google/Bing menampilkan domain dan tidak boleh digunakan untuk traffic organik palsu.
+Hasilnya hanya sinyal teknis indexability, bukan konfirmasi indeksasi aktual. Verifikasi status indeksasi melalui Google Search Console atau Bing Webmaster Tools.
 
 ## 🔗 Multi-URL
 
@@ -134,14 +134,12 @@ Untuk pengujian sah, gunakan staging property atau event khusus seperti `authori
 
 ## 🧪 Troubleshooting
 
-### Search Engine tidak menemukan website
+### Audit SEO gagal
 
-1. Cari manual dengan `site:example.com`.
-2. Daftarkan website di Search Console dan Bing Webmaster Tools.
-3. Kirim sitemap.
-4. Periksa `robots.txt`, canonical, dan meta `noindex`.
-5. Pastikan response website HTTP 200.
-6. Periksa log backend untuk redirect hasil pencarian.
+1. Pastikan URL memakai HTTP/HTTPS dan domain tercakup dalam `ALLOWED_DOMAINS`.
+2. Pastikan halaman, `robots.txt`, dan sitemap dapat diakses publik.
+3. Periksa temuan `noindex`, aturan `Disallow: /`, canonical, dan status HTTP.
+4. Untuk status indeksasi aktual, gunakan Search Console atau Bing Webmaster Tools.
 
 ### Chromium gagal dibuka
 
@@ -150,10 +148,6 @@ npx playwright install chromium
 ```
 
 Kurangi batch, tutup aplikasi berat, dan pastikan RAM cukup.
-
-### `Target link not found`
-
-Search engine tidak memberikan link target yang dapat divalidasi. Ini berbeda dari error browser atau URL.
 
 ## 🐳 Docker
 
