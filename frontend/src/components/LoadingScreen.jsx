@@ -4,7 +4,7 @@ import { FaCheckCircle, FaChevronRight, FaClock, FaGlobe, FaLayerGroup, FaNetwor
 import { useLanguage } from '../i18n';
 
 function LoadingScreen({ progress, onStop, url, options = {} }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [ip, setIp] = useState('Detecting...');
   const [elapsed, setElapsed] = useState(0);
   useEffect(() => {
@@ -44,7 +44,7 @@ function LoadingScreen({ progress, onStop, url, options = {} }) {
           })}
           <div className="rounded-2xl border border-white/10 bg-white/[.04] p-4"><div className="mb-2 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-500"><FaNetworkWired className="text-blue-400" /> {t('clientIp')}</div><p className="font-mono text-xs text-slate-200">{ip}</p></div>
         </div>
-        <div className="mb-6 flex flex-wrap gap-2 text-[10px] font-semibold text-slate-300"><span className="flex items-center gap-1.5 rounded-full border border-violet-400/20 bg-violet-400/10 px-3 py-1.5"><FaShieldAlt className="text-violet-300" /> {options.trafficMode || 'stealth'} mode</span><span className="flex items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1.5"><FaLayerGroup className="text-cyan-300" /> Batch {options.maxBatchVisits || 1}</span>{progress?.totalLoops > 1 && <span className="flex items-center gap-1.5 rounded-full border border-fuchsia-400/20 bg-fuchsia-400/10 px-3 py-1.5"><FaCheckCircle className="text-fuchsia-300" /> Loop {progress.currentLoop || 1}/{progress.totalLoops}</span>}</div>
+        <div className="mb-6 flex flex-wrap gap-2 text-[10px] font-semibold text-slate-300"><span className="flex items-center gap-1.5 rounded-full border border-violet-400/20 bg-violet-400/10 px-3 py-1.5"><FaShieldAlt className="text-violet-300" /> {options.trafficMode || 'stealth'} mode</span><span className="flex items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1.5"><FaLayerGroup className="text-cyan-300" /> Batch {options.maxBatchVisits || 1}</span>{options.trafficMode === 'qa' && <span className="flex items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-400/10 px-3 py-1.5"><FaClock className="text-amber-300" /> {language === 'id' ? 'Durasi' : 'Duration'} {options.visitDurationMinutes} min</span>}{progress?.totalLoops > 1 && <span className="flex items-center gap-1.5 rounded-full border border-fuchsia-400/20 bg-fuchsia-400/10 px-3 py-1.5"><FaCheckCircle className="text-fuchsia-300" /> Loop {progress.currentLoop || 1}/{progress.totalLoops}</span>}</div>
         <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: .98 }} onClick={onStop} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-rose-600 to-red-500 py-4 text-sm font-bold uppercase tracking-widest shadow-lg shadow-red-950/30"><FaStop className="text-xs" /> {t('stop')}</motion.button><p className="mt-3 text-center text-[10px] text-slate-600">{t('safeStop')}</p>
       </div>
     </motion.div>

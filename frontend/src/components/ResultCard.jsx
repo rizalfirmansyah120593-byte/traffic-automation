@@ -6,11 +6,11 @@ import { useLanguage } from '../i18n';
 function ResultCard({ data }) {
   const { language } = useLanguage();
   const labels = {
-    id: { success: 'Automation Berhasil', failed: 'Automation Gagal', mode: 'Mode Traffic', total: 'Total Waktu', load: 'Waktu Muat', ttfb: 'TTFB', dom: 'DOM Siap', ip: 'Alamat IP', status: 'Status', behavior: 'Simulasi Perilaku Browser', device: 'Jenis Perangkat', viewport: 'Viewport', agent: 'User Agent', timezone: 'Zona Waktu', platform: 'Platform', geo: 'Geolocation', webgl: 'WebGL', audit: 'Log Audit', duration: 'Durasi', engine: 'Mesin Pencari', screenshot: 'Screenshot', console: 'Log Console', url: 'URL' },
-    en: { success: 'Automation Successful', failed: 'Automation Failed', mode: 'Traffic Mode', total: 'Total Time', load: 'Load Time', ttfb: 'TTFB', dom: 'DOM Ready', ip: 'IP Address', status: 'Status', behavior: 'Human Behavior Simulation', device: 'Device Type', viewport: 'Viewport', agent: 'User Agent', timezone: 'Timezone', platform: 'Platform', geo: 'Geolocation', webgl: 'WebGL', audit: 'Audit Log', duration: 'Duration', engine: 'Search Engine', screenshot: 'Screenshot', console: 'Console Logs', url: 'URL' },
-    es: { success: 'Automatización exitosa', failed: 'Automatización fallida', mode: 'Modo de tráfico', total: 'Tiempo total', load: 'Tiempo de carga', ttfb: 'TTFB', dom: 'DOM listo', ip: 'Dirección IP', status: 'Estado', behavior: 'Simulación de comportamiento', device: 'Tipo de dispositivo', viewport: 'Viewport', agent: 'User Agent', timezone: 'Zona horaria', platform: 'Plataforma', geo: 'Geolocalización', webgl: 'WebGL', audit: 'Registro de auditoría', duration: 'Duración', engine: 'Buscador', screenshot: 'Captura', console: 'Registros de consola', url: 'URL' },
-    fr: { success: 'Automatisation réussie', failed: 'Échec de l’automatisation', mode: 'Mode trafic', total: 'Temps total', load: 'Temps de chargement', ttfb: 'TTFB', dom: 'DOM prêt', ip: 'Adresse IP', status: 'Statut', behavior: 'Simulation du comportement', device: 'Type d’appareil', viewport: 'Viewport', agent: 'User Agent', timezone: 'Fuseau horaire', platform: 'Plateforme', geo: 'Géolocalisation', webgl: 'WebGL', audit: 'Journal d’audit', duration: 'Durée', engine: 'Moteur de recherche', screenshot: 'Capture', console: 'Journaux console', url: 'URL' },
-    de: { success: 'Automation erfolgreich', failed: 'Automation fehlgeschlagen', mode: 'Traffic-Modus', total: 'Gesamtzeit', load: 'Ladezeit', ttfb: 'TTFB', dom: 'DOM bereit', ip: 'IP-Adresse', status: 'Status', behavior: 'Simulation des Browserverhaltens', device: 'Gerätetyp', viewport: 'Viewport', agent: 'User-Agent', timezone: 'Zeitzone', platform: 'Plattform', geo: 'Geolocation', webgl: 'WebGL', audit: 'Audit-Protokoll', duration: 'Dauer', engine: 'Suchmaschine', screenshot: 'Screenshot', console: 'Konsolenprotokolle', url: 'URL' }
+    id: { success: 'Automation Berhasil', failed: 'Automation Gagal', mode: 'Mode Traffic', total: 'Total Waktu', visitDuration: 'Durasi Kunjungan', load: 'Waktu Muat', ttfb: 'TTFB', dom: 'DOM Siap', ip: 'Alamat IP', status: 'Status', behavior: 'Simulasi Perilaku Browser', device: 'Jenis Perangkat', viewport: 'Viewport', agent: 'User Agent', timezone: 'Zona Waktu', platform: 'Platform', geo: 'Geolocation', webgl: 'WebGL', audit: 'Log Audit', duration: 'Durasi', engine: 'Mesin Pencari', screenshot: 'Screenshot', console: 'Log Console', url: 'URL' },
+    en: { success: 'Automation Successful', failed: 'Automation Failed', mode: 'Traffic Mode', total: 'Total Time', visitDuration: 'Visit Duration', load: 'Load Time', ttfb: 'TTFB', dom: 'DOM Ready', ip: 'IP Address', status: 'Status', behavior: 'Human Behavior Simulation', device: 'Device Type', viewport: 'Viewport', agent: 'User Agent', timezone: 'Timezone', platform: 'Platform', geo: 'Geolocation', webgl: 'WebGL', audit: 'Audit Log', duration: 'Duration', engine: 'Search Engine', screenshot: 'Screenshot', console: 'Console Logs', url: 'URL' },
+    es: { success: 'Automatización exitosa', failed: 'Automatización fallida', mode: 'Modo de tráfico', total: 'Tiempo total', visitDuration: 'Duración de visita', load: 'Tiempo de carga', ttfb: 'TTFB', dom: 'DOM listo', ip: 'Dirección IP', status: 'Estado', behavior: 'Simulación de comportamiento', device: 'Tipo de dispositivo', viewport: 'Viewport', agent: 'User Agent', timezone: 'Zona horaria', platform: 'Plataforma', geo: 'Geolocalización', webgl: 'WebGL', audit: 'Registro de auditoría', duration: 'Duración', engine: 'Buscador', screenshot: 'Captura', console: 'Registros de consola', url: 'URL' },
+    fr: { success: 'Automatisation réussie', failed: 'Échec de l’automatisation', mode: 'Mode trafic', total: 'Temps total', visitDuration: 'Durée de visite', load: 'Temps de chargement', ttfb: 'TTFB', dom: 'DOM prêt', ip: 'Adresse IP', status: 'Statut', behavior: 'Simulation du comportement', device: 'Type d’appareil', viewport: 'Viewport', agent: 'User Agent', timezone: 'Fuseau horaire', platform: 'Plateforme', geo: 'Géolocalisation', webgl: 'WebGL', audit: 'Journal d’audit', duration: 'Durée', engine: 'Moteur de recherche', screenshot: 'Capture', console: 'Journaux console', url: 'URL' },
+    de: { success: 'Automation erfolgreich', failed: 'Automation fehlgeschlagen', mode: 'Traffic-Modus', total: 'Gesamtzeit', visitDuration: 'Besuchsdauer', load: 'Ladezeit', ttfb: 'TTFB', dom: 'DOM bereit', ip: 'IP-Adresse', status: 'Status', behavior: 'Simulation des Browserverhaltens', device: 'Gerätetyp', viewport: 'Viewport', agent: 'User-Agent', timezone: 'Zeitzone', platform: 'Plattform', geo: 'Geolocation', webgl: 'WebGL', audit: 'Audit-Protokoll', duration: 'Dauer', engine: 'Suchmaschine', screenshot: 'Screenshot', console: 'Konsolenprotokolle', url: 'URL' }
   }[language] || {};
   const visits = Array.isArray(data.visits) ? data.visits : null;
   const isMulti = Boolean(visits && visits.length > 1);
@@ -34,6 +34,8 @@ function ResultCard({ data }) {
 
   const safeActiveIndex = visits ? Math.min(activeVisitIndex, visits.length - 1) : 0;
   const active = visits ? visits[safeActiveIndex] : data;
+  const visitDurationSeconds = Number.parseFloat(active?.duration);
+  const visitDuration = Number.isFinite(visitDurationSeconds) ? `${visitDurationSeconds.toFixed(2)}s` : '—';
 
   if (data.batch && Array.isArray(data.results)) {
     return <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
@@ -99,6 +101,7 @@ function ResultCard({ data }) {
               <p className="text-sm font-bold text-blue-300">
                 {data.summary.trafficMode === 'stealth' && '🛡️ Stealth'}
                 {data.summary.trafficMode === 'storm' && '⚡ Storm'}
+                {data.summary.trafficMode === 'qa' && '🧪 QA'}
                 {data.summary.trafficMode === 'search' && '🔍 Search'}
               </p>
             </div>
@@ -150,7 +153,13 @@ function ResultCard({ data }) {
         </div>
       )}
       
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+        <StatBox
+          icon={<FaClock />}
+          label={`${labels.visitDuration}${active?.configuredVisitDurationMinutes ? ` (${active.configuredVisitDurationMinutes} min target)` : ''}`}
+          value={visitDuration}
+          color="purple"
+        />
         <StatBox 
           icon={<FaClock />} 
           label={labels.load} 

@@ -13,6 +13,13 @@ const dns = require('dns').promises;
 const ipaddr = require('ipaddr.js');
 const { automateWebsite } = require('../services/playwright');
 const { auditSite } = require('../services/seoAudit');
+const {
+  parseVisitDurationMinutes,
+  parseQaRunCounts,
+  MAX_QA_VISITS_PER_REQUEST,
+  MAX_QA_LOOPS_PER_REQUEST,
+  MAX_QA_TOTAL_VISITS
+} = require('../services/qa');
 
 // Process-wide safety guards. Configure these with environment variables in production.
 const activeJobs = new Set();
@@ -158,18 +165,43 @@ router.post('/automate', async (req, res) => {
 
   // Validate traffic mode
   const trafficMode = safeOptions.trafficMode || 'stealth';
-  const validModes = ['stealth', 'storm'];
+  const validModes = ['stealth', 'storm', 'qa'];
   if (!validModes.includes(trafficMode)) {
     return res.status(400).json({
       success: false,
-      error: 'Invalid traffic mode. Must be: stealth or storm'
+      error: 'Invalid traffic mode. Must be: stealth, storm, or qa'
     });
+  }
+
+  if (trafficMode === 'qa') {
+    if (!(process.env.ALLOWED_DOMAINS || '').trim()) {
+      return res.status(403).json({ success: false, error: 'QA mode requires ALLOWED_DOMAINS to be configured.' });
+    }
+    if (requestedBatchUrls.length !== 1) {
+      return res.status(400).json({ success: false, error: 'QA mode runs one URL per request.' });
+    }
+    try {
+      parseQaRunCounts(visitCount, loopCount);
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        error: `${error.message} Limits: ${MAX_QA_VISITS_PER_REQUEST} visits, ${MAX_QA_LOOPS_PER_REQUEST} loop, ${MAX_QA_TOTAL_VISITS} total visits.`
+      });
+    }
+    if (new URL(batchUrls[0]).href !== targetUrl.href) {
+      return res.status(400).json({ success: false, error: 'QA mode URL and batch URL must match.' });
+    }
+    try {
+      safeOptions.visitDurationMinutes = parseVisitDurationMinutes(safeOptions.visitDurationMinutes);
+    } catch (error) {
+      return res.status(400).json({ success: false, error: error.message });
+    }
   }
 
   // Validate batch size based on mode
   const maxBatchRaw = safeOptions.maxBatchVisits;
   const maxBatchLimit = 20; // FIXED: Consistent limit of 20 across all modes
-  const maxBatchVisits = maxBatchRaw === undefined ? 5 : Math.min(Number(maxBatchRaw), maxBatchLimit);
+  const maxBatchVisits = trafficMode === 'qa' ? 1 : maxBatchRaw === undefined ? 5 : Math.min(Number(maxBatchRaw), maxBatchLimit);
   if (!Number.isInteger(maxBatchVisits) || maxBatchVisits < 1 || maxBatchVisits > maxBatchLimit) {
     return res.status(400).json({
       success: false,

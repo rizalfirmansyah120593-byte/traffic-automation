@@ -17,6 +17,14 @@ const seoAuditContent = {
   de: ['🔍 Passives SEO-Audit', 'Prüft technische Signale ohne Suchmaschine oder Klicks.', ['HTTP-Status und Title/Description', 'Canonical, Robots-Meta und X-Robots-Tag', 'robots.txt und Sitemap', 'Signale bestätigen keine Indexierung']]
 };
 
+const qaModeContent = {
+  id: ['🧪 Mode QA durasi eksplisit', 'Menahan halaman untuk pemeriksaan manual di domain yang Anda berwenang uji.', ['Browser standar, tanpa plugin stealth atau spoofing', 'Satu URL; 5 visit berurutan dan 1 loop', 'Durasi 1–10 menit per visit; default 5 menit', 'Hanya aktif jika domain tercakup ALLOWED_DOMAINS']],
+  en: ['🧪 Explicit-duration QA mode', 'Keeps a page open for a QA check on a domain you are authorized to test.', ['Standard browser, no stealth plugin or spoofing', 'One URL; 5 sequential visits and 1 loop', '1–10 minutes per visit; defaults to 5 minutes', 'Requires the domain in ALLOWED_DOMAINS']],
+  es: ['🧪 Modo QA con duración explícita', 'Mantiene la página abierta para QA en un dominio autorizado.', ['Navegador estándar, sin stealth ni suplantación', 'Una URL; 5 visitas secuenciales y 1 ciclo', '1–10 minutos por visita; 5 por defecto', 'Requiere el dominio en ALLOWED_DOMAINS']],
+  fr: ['🧪 Mode QA à durée explicite', 'Garde la page ouverte pour un contrôle QA sur un domaine autorisé.', ['Navigateur standard, sans stealth ni usurpation', 'Une URL; 5 visites séquentielles et 1 boucle', '1–10 minutes par visite; 5 par défaut', 'Domaine requis dans ALLOWED_DOMAINS']],
+  de: ['🧪 QA-Modus mit fester Dauer', 'Hält die Seite für einen QA-Test auf einer autorisierten Domain offen.', ['Standardbrowser ohne Stealth oder Spoofing', 'Eine URL; 5 sequenzielle Besuche und 1 Durchlauf', '1–10 Minuten pro Besuch; Standard 5 Minuten', 'Domain muss in ALLOWED_DOMAINS stehen']]
+};
+
 const seoGuide = {
   id: {
     steps: ['Masukkan satu URL yang tercakup dalam allowlist.', 'Pilih Audit SEO pasif dan mulai audit.', 'Tinjau status HTTP, robots, sitemap, canonical, dan noindex.', 'Verifikasi indeksasi aktual melalui Search Console atau Bing Webmaster Tools.'],
@@ -49,12 +57,13 @@ export default function UsageGuide() {
   const { language } = useLanguage();
   const c = content[language] || content.en;
   const seo = seoAuditContent[language] || seoAuditContent.en;
+  const qa = qaModeContent[language] || qaModeContent.en;
   const guide = seoGuide[language] || seoGuide.en;
   return <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-16 mb-8 rounded-3xl border border-white/10 bg-slate-900/60 p-6 shadow-2xl backdrop-blur-md sm:p-8">
     <h2 className="mb-3 text-center text-3xl font-bold text-transparent bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text">📖 {c.title}</h2>
     <p className="mx-auto mb-8 max-w-3xl text-center text-sm text-slate-300">{c.intro}</p>
     <div className="mb-8 rounded-2xl border border-violet-400/20 bg-violet-500/10 p-5"><h3 className="mb-3 text-xl font-semibold text-violet-200">🚀 {c.start}</h3><ol className="grid gap-3 text-sm text-slate-300 md:grid-cols-2">{guide.steps.map((x, i) => <li key={x} className="flex gap-3"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-violet-500/30 text-xs font-bold text-violet-200">{i + 1}</span>{x}</li>)}</ol></div>
-    <div className="grid gap-5 lg:grid-cols-3">{c.modes.slice(0, 2).map(([title, desc, list], i) => <article key={title} className={`rounded-2xl border p-5 ${['border-indigo-500/40 bg-indigo-950/40', 'border-orange-500/40 bg-orange-950/40'][i]}`}><h3 className="mb-2 text-lg font-semibold text-white">{title}</h3><p className="mb-4 text-sm text-slate-300">{desc}</p><ul className="space-y-2 text-sm text-slate-300">{list.map(x => <li key={x}>✓ {x}</li>)}</ul></article>)}<article className="rounded-2xl border border-cyan-500/40 bg-cyan-950/40 p-5"><h3 className="mb-2 text-lg font-semibold text-white">{seo[0]}</h3><p className="mb-4 text-sm text-slate-300">{seo[1]}</p><ul className="space-y-2 text-sm text-slate-300">{seo[2].map(x => <li key={x}>✓ {x}</li>)}</ul></article></div>
+    <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-4">{c.modes.slice(0, 2).map(([title, desc, list], i) => <article key={title} className={`rounded-2xl border p-5 ${['border-indigo-500/40 bg-indigo-950/40', 'border-orange-500/40 bg-orange-950/40'][i]}`}><h3 className="mb-2 text-lg font-semibold text-white">{title}</h3><p className="mb-4 text-sm text-slate-300">{desc}</p><ul className="space-y-2 text-sm text-slate-300">{list.map(x => <li key={x}>✓ {x}</li>)}</ul></article>)}<article className="rounded-2xl border border-violet-500/40 bg-violet-950/40 p-5"><h3 className="mb-2 text-lg font-semibold text-white">{qa[0]}</h3><p className="mb-4 text-sm text-slate-300">{qa[1]}</p><ul className="space-y-2 text-sm text-slate-300">{qa[2].map(x => <li key={x}>✓ {x}</li>)}</ul></article><article className="rounded-2xl border border-cyan-500/40 bg-cyan-950/40 p-5"><h3 className="mb-2 text-lg font-semibold text-white">{seo[0]}</h3><p className="mb-4 text-sm text-slate-300">{seo[1]}</p><ul className="space-y-2 text-sm text-slate-300">{seo[2].map(x => <li key={x}>✓ {x}</li>)}</ul></article></div>
     <div className="mt-5 grid gap-5 md:grid-cols-2"><article className="rounded-2xl border border-emerald-500/30 bg-emerald-950/30 p-5"><h3 className="mb-3 text-lg font-semibold text-emerald-200">💡 {c.tips}</h3><ul className="space-y-2 text-sm text-slate-300">{guide.tips.map(x => <li key={x}>• {x}</li>)}</ul></article><article className="rounded-2xl border border-amber-500/30 bg-amber-950/30 p-5"><h3 className="mb-3 text-lg font-semibold text-amber-200">🔧 {c.troubleshooting}</h3><div className="space-y-3 text-sm text-slate-300">{guide.problems.map(([q, a]) => <div key={q}><strong className="text-amber-100">{q}</strong><p>{a}</p></div>)}</div></article></div>
   </motion.section>;
 }

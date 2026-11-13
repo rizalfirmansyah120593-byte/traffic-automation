@@ -25,7 +25,7 @@ Platform otomasi browser berbasis React, Node.js, Express, dan Playwright untuk 
 
 - Dashboard React dengan progress real-time melalui Server-Sent Events.
 - Playwright Chromium untuk pengujian navigasi, JavaScript, performa, screenshot, dan analytics.
-- Mode Stealth, Storm, dan audit SEO pasif.
+- Mode Stealth, Storm, QA berdurasi eksplisit, dan audit SEO pasif.
 - Device, viewport, timezone, locale, geolocation, dan user agent configuration.
 - Hingga 3 URL yang diproses sequential agar penggunaan RAM stabil.
 - Progress, hasil, error, audit log, console log, dan screenshot.
@@ -90,6 +90,10 @@ Pengujian kompatibilitas browser dan interaksi halaman pada website yang diizink
 ### Storm
 
 Load test terbatas pada server milik sendiri. Mulai dari batch kecil dan pantau CPU, RAM, response time, serta error rate.
+
+### QA berdurasi eksplisit
+
+Mempertahankan halaman terbuka selama 1–10 menit per visit (default 5 menit) untuk QA pada satu domain yang tercantum di `ALLOWED_DOMAINS`. Mode menjalankan 5 visit sequential dan 1 loop (maksimal 5 total visit per permintaan). Mode ini memakai browser standar tanpa plugin stealth, spoofing, klik, atau batch. Respons non-2xx ditampilkan sebagai gagal dan tidak ditahan selama durasi yang dipilih.
 
 ### Audit SEO
 

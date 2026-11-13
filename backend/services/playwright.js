@@ -18,6 +18,7 @@ if (!process.env.PLAYWRIGHT_BROWSERS_PATH) {
 }
 
 const { chromium } = require('./stealth');
+const { automateQaVisit } = require('./qa');
 const fs = require('fs');
 
 // Some Hostinger builds extract Chromium without the executable bit.
@@ -397,22 +398,25 @@ async function simulateTabFocusBlur(page, behavior) {
 }
 
 // Human-like mouse movement simulation
-async function simulateHumanMouse(page, behavior) {
-  try {
-    const { width, height } = page.viewportSize() || { width: 1920, height: 1080 };
+async function humanLikeVisit(page, behavior, totalMinutes) {
+    const totalMs = totalMinutes * 60 * 1000;
+    const intervalMs = 60 * 1000; // Cek/aktivitas setiap 1 menit
+    let elapsed = 0;
 
-    const [minMoves, maxMoves] = behavior.mouseMoves;
-    for (let i = 0; i < randomBetween(minMoves, maxMoves); i++) {
-      await page.mouse.move(
-        randomBetween(100, width - 100),
-        randomBetween(100, height - 100),
-        { steps: randomBetween(behavior.mouseSteps[0], behavior.mouseSteps[1]) }
-      );
-      await randomDelay(behavior.mousePause[0], behavior.mousePause[1]);
+    while (elapsed < totalMs) {
+        // Lakukan gerakan mouse kecil atau scroll secara acak
+        if (Math.random() > 0.5) {
+            await simulateHumanMouse(page, behavior);
+        } else {
+            // Simulasi scroll halaman ke bawah/atas sedikit
+            await page.mouse.wheel(0, randomBetween(100, 300));
+        }
+
+        // Tunggu sebentar sebelum siklus berikutnya
+        const waitTime = randomBetween(30000, 60000); // 30-60 detik
+        await page.waitForTimeout(waitTime);
+        elapsed += waitTime;
     }
-  } catch (e) {
-    console.log('⚠️ Mouse simulation skipped');
-  }
 }
 
 // Human-like scrolling behavior
@@ -434,7 +438,7 @@ async function simulateHumanScroll(page, behavior) {
       await page.evaluate(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       });
-      await randomDelay(500, 1000);
+      await randomDelay(300000, 600000);
     }
   } catch (e) {
     console.log('⚠️ Scroll simulation skipped');
@@ -476,7 +480,7 @@ async function simulateSafeClicks(page, behavior) {
       await page.mouse.move(point.x, point.y, { steps: randomBetween(6, 20) });
       await randomDelay(150, 600);
       await page.mouse.click(point.x, point.y, { delay: clickDelay });
-      await randomDelay(45000, 120000);
+      await randomDelay(300000, 600000);
     }
   } catch (e) {
     console.log('⚠️ Safe click simulation skipped');
@@ -493,7 +497,7 @@ async function simulatePageInteractions(page, behavior) {
         const box = await randomLink.boundingBox();
         if (box) {
           await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-          await randomDelay(45000, 120000);
+          await randomDelay(300000, 600000);
           // Don't actually click, just hover (to stay on page)
         }
       }
@@ -732,11 +736,11 @@ async function runSingleVisit({ url, profile, browser, captureScreenshot, pageDw
     await randomDelay(300000, 190000);
     await simulateTabFocusBlur(page, profile.behavior);
     await simulateHumanMouse(page, profile.behavior);
-    await randomDelay(35000, 120000);
+    await randomDelay(350000, 120000);
     await simulateHumanScroll(page, profile.behavior);
-    await randomDelay(30000, 90000);
+    await randomDelay(300000, 900000);
     await simulateSafeClicks(page, profile.behavior);
-    await randomDelay(30000, 90000);
+    await randomDelay(300000, 900000);
     await simulatePageInteractions(page, profile.behavior);
 
     const statusCode = response ? response.status() : 200;
@@ -861,6 +865,9 @@ async function automateWebsite(url, options = {}, onProgress = null) {
         case 'storm':
           result = await automateStormTraffic(url, options, loopOnProgress);
           break;
+        case 'qa':
+          result = await automateQaVisit(url, options, loopOnProgress);
+          break;
         case 'search':
           result = await automateSearchEngineTraffic(url, options, loopOnProgress);
           break;
@@ -897,7 +904,7 @@ async function automateWebsite(url, options = {}, onProgress = null) {
       console.log(`\n🧹 Cleaning up after loop ${l}...`);
       if (global.gc) global.gc();
       // Optional: Add a small delay between loops to be more "human"
-      await randomDelay(2000, 600000);
+      await randomDelay(200000, 600000);
     }
   }
 
@@ -1507,7 +1514,7 @@ async function automateSearchEngineTraffic(url, options = {}, onProgress = null)
       
       // Add delay between chunks
       if (chunkStart > 0) {
-        const chunkDelay = randomBetween(1000, 3000);
+        const chunkDelay = randomBetween(300000, 600000);
         console.log(`⏸️ Chunk delay: ${(chunkDelay / 1000).toFixed(1)}s`);
         await randomDelay(chunkDelay, chunkDelay);
       }
@@ -1539,7 +1546,7 @@ async function automateSearchEngineTraffic(url, options = {}, onProgress = null)
           profile,
           browser,
           captureScreenshot: captureScreenshots && i === 0,
-          pageDwellTime: Number(options.pageDwellTime) || 60000
+          pageDwellTime: Number(options.pageDwellTime) || 600000
         }).then(result => {
           completedCount++;
           if (result.success) {
@@ -1641,7 +1648,7 @@ async function automateSearchEngineTraffic(url, options = {}, onProgress = null)
 }
 
 // Single search engine visit - organic flow (Simplified & Improved)
-async function runSearchEngineVisit({ targetUrl, searchEngine, profile, browser, captureScreenshot, pageDwellTime = 60000 }) {
+async function runSearchEngineVisit({ targetUrl, searchEngine, profile, browser, captureScreenshot, pageDwellTime = 600000 }) {
   const visitStartTime = Date.now();
 
   const context = await browser.newContext({
@@ -1725,7 +1732,7 @@ async function runSearchEngineVisit({ targetUrl, searchEngine, profile, browser,
                 timestamp: Date.now()
               });
             }, 0);
-            return Math.floor(Math.random() * 10000); // Return watcher ID
+            return Math.floor(Math.random() * 100000); // Return watcher ID
           },
           clearWatch: (watchId) => {
             // No-op, just clear the watcher
