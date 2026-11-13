@@ -2017,7 +2017,9 @@ async function runSearchEngineVisit({ targetUrl, searchEngine, profile, browser,
         console.log(`   ❌ Target "${baseDomain}" NOT found in first ${checkedCount} links`);
         throw new Error(`Target link not found in ${searchEngine.name} results`);
       }
-
+      
+      // Mengatur dwell time menjadi 10 menit (600.000 milidetik)
+      const pageDwellTime = 600000;
       // Wait for navigation to target website
       await page.waitForLoadState('domcontentloaded', { timeout: 15000 });
       await page.waitForTimeout(pageDwellTime);
