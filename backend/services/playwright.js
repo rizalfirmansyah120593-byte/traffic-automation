@@ -398,6 +398,30 @@ async function simulateTabFocusBlur(page, behavior) {
 }
 
 // Human-like mouse movement simulation
+async function simulateHumanMouse(page, behavior) {
+  try {
+    const viewport = page.viewportSize();
+    if (!viewport || viewport.width < 1 || viewport.height < 1) return;
+
+    const [minMoves, maxMoves] = behavior.mouseMoves;
+    const totalMoves = randomBetween(minMoves, maxMoves);
+
+    for (let i = 0; i < totalMoves; i++) {
+      const target = {
+        x: randomBetween(0, viewport.width - 1),
+        y: randomBetween(0, viewport.height - 1)
+      };
+      const steps = randomBetween(behavior.mouseSteps[0], behavior.mouseSteps[1]);
+
+      await page.mouse.move(target.x, target.y, { steps });
+      await randomDelay(behavior.mousePause[0], behavior.mousePause[1]);
+    }
+  } catch (error) {
+    console.log(`⚠️ Mouse simulation skipped: ${error.message}`);
+  }
+}
+
+// Human-like mouse movement simulation
 async function humanLikeVisit(page, behavior, totalMinutes) {
     const totalMs = totalMinutes * 60 * 1000;
     const intervalMs = 60 * 1000; // Cek/aktivitas setiap 1 menit
